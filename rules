@@ -1,0 +1,25 @@
+1. Nie używać singletonów (nadmiarowy kod w każdym miejscu użycia)
+   Zastępować obiektami globalnymi, zdefiniowanymi w pliku nagłówkowym
+   (a najlepiej w pliku nagłówkowym przechowywać definicję, a deklarację umieścić
+    w ciele funkcji main)
+   
+2. Unikać obiektów globalnych - dodają dodatkowy kod (global_ctors oraz global_dtors)
+
+3. obsługę urządzeń pisać bez przerwań (sama klasa urzadzenia powinna miec funkcję
+   (o ile ma to jakiś większy sens), którą użytkownik może wywolać we własnoręcznie 
+   napisanej funkcji przerwania)
+   
+4. gdzie się da - używać template zamiast rozbudowanych konstuktorów (w przypadku SED1520
+   kod zmalał do ~30% poczatkowego rozmiaru!)
+
+5. rozróżnianie zasobów: 
+   a) spis portów znajduje się w katalogu ports, 
+   b) w lib.hpp opis wielkości pamięci,
+   c) każde urządzenie (np SPI) zawiera opis portów i pinów (jeśli taka informacja ma znaczenie)
+      w odpowiednim dla siebie pliku nagłówkowym
+   
+6. (zasada w trakcie testów) 
+   funkcje przyjmujące wskaźnik powinny być zdefiniowane jako funkcje szablonowe 
+   (jako przykład: usartbase.hpp). Dzięki temu argumentem może być p_pointer_far lub p_pointer
+   (progmem.hpp). A sama funkcja dzięki temu (i używaniu funkcji z namespace PMem) działać będzie
+   z obydwoma typami wskaźników.
