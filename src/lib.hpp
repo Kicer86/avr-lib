@@ -2,6 +2,8 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+//gcc 4.5.0 wymagany
+
 int main() __attribute__((noreturn));
 extern "C" void atexit( void ) {}
 extern "C" void __cxa_pure_virtual() {}
