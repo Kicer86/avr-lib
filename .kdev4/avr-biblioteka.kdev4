@@ -2,12 +2,9 @@
 BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
 
 [CMake]
-BuildDirs[$e]=/mnt/share/home/michal/projects/tmp/builds/avr-biblioteka
+BuildDirs[$e]=$HOME/projects/sources/avr-biblioteka/build
 CMakeDir=/usr/share/cmake/Modules
-Current CMake Binary=file:///usr/bin/cmake
-CurrentBuildDir=file:///mnt/share/home/michal/projects/tmp/builds/avr-biblioteka
-CurrentBuildType=Release
-CurrentInstallDir=file:///usr/local
+CurrentBuildDir=file:///home/michal/projects/sources/avr-biblioteka/build
 Extra Arguments=
 ProjectRootRelative=./
 

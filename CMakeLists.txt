@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 add_subdirectory("tools")       #some extra tools
 
-include ("/home/michal/projects/usr/avr/CMakeLists.txt")
+include ("/home/michal/projects/root/usr/avr/CMakeLists.txt")
 
 avr_module(display
   MODULE_HEADERS src/lcd/display.hpp src/lcd/font.h
