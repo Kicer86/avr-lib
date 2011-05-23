@@ -55,8 +55,8 @@
 #define HD44780_CGRAM_SET       0x40
 #define HD44780_DDRAM_SET       0x80
 
-
-template<port_ptr data_port, byte dataShift, port_ptr ctrl_port, byte rsPos, byte rwPos, byte ePos>
+//connect rw to gnd
+template<port_ptr data_port, byte dataShift, port_ptr ctrl_port, byte rsPos, byte ePos>
 class HD44780
 {
     void writeNibble(byte nibble) const
@@ -97,21 +97,9 @@ class HD44780
       Delay::ms(2);
     }
 
-
-  public:
-    HD44780()
-    {
-      TIOPort<data_port> dataPort;
-      TIOPort<ctrl_port> ctrlPort;
-
-      dataPort.dir|=0xf<<dataShift;
-      ctrlPort.dir|=(1<<rsPos) | (1<<rwPos) | (1<<ePos);
-    }
-
     void init()
     {
       TIOPort<data_port> dataPort;
-      TIOPort<ctrl_port> ctrlPort;
 
       Delay::ms(100);   //najgorszy przypadek - zasilanie 2,7V
 
@@ -131,8 +119,20 @@ class HD44780
       writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_ON | HD44780_CURSOR_OFF | HD44780_CURSOR_NOBLINK);
     }
 
+  public:
+    HD44780()
+    {
+      TIOPort<data_port> dataPort;
+      TIOPort<ctrl_port> ctrlPort;
 
-    void writeConstString(const char *str)
+      dataPort.dir|=0xf<<dataShift;
+      ctrlPort.dir|=(1<<rsPos) /*| (1<<rwPos)*/ | (1<<ePos);
+//       ctrlPort&=~(1<<rwPos);    //force write only
+      
+      init();
+    }
+
+    void write_PString(const char *str)
     {
       byte data;
       while ( (data=Com::readFlash8(str++))!=0)
