@@ -27,6 +27,13 @@ class Delay
 
   public:
     template <word delay>
+    static void ns()
+    {
+      const dword ticks=static_cast<dword>(delay) * tics_per_mhz/1000;
+      tick (ticks);
+    }
+    
+    template <word delay>
     static void us() 
     {
       const dword ticks=static_cast<dword>(delay) * tics_per_mhz;
@@ -36,7 +43,7 @@ class Delay
       else if (ticks>2 && ticks<=770)      //powyżej 2 cykli ale do 770 (256*3+2)
       {
         byte tmp;
-        word loops=ticks/3;     //liczba pętli = rządany czas / koszt całej pętli
+        word loops=(ticks/3) & 0xffff;     //liczba pętli = rządany czas / koszt całej pętli
         asm volatile
         (
           "ldi %0,%1\n"  //minimalny koszt całości to 3 cykle
@@ -55,7 +62,7 @@ class Delay
       {
         //static_assert((ticks-1)/4<=65536, "Too big loop for delay_us");
         byte t1,t2;
-        const word loops=(ticks-1)/4;     //liczba pętli = rządany czas / koszt całej pętli (jeden rozkaz jest nadmiarowy, trzeba go odjąc)
+        const word loops=((ticks-1)/4) & 0xffff;     //liczba pętli = rządany czas / koszt całej pętli (jeden rozkaz jest nadmiarowy, trzeba go odjąc)
         const byte l=loops & 0xff;
         const byte h=loops >> 8;
         asm volatile
@@ -67,11 +74,11 @@ class Delay
           "sbci %1,0\n"
           "brne 0b\n"
           :"=d"(t1),"=d"(t2)
-          :"i"(l),"i"(h)
+          :"X"(l),"X"(h)
         );
 
         //dołóż to co jeszcze zostało (reszta)
-        const byte r=(ticks-1)-(loops)*4;
+        const byte r=((ticks-1)-(loops)*4) & 0xff;
         tick(r);
       }
     }

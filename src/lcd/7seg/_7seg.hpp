@@ -6,6 +6,9 @@
 #include "../../ports/ports.hpp"
 
 
+//makro do tworzenia kodów wyświetlaczy 7 segmentowych
+//name - nazwa powstałej tabeli
+//kolejne wartości -> numery pinów portu pod którymi znajdują się dane segmenty
 #define CREATE_TRANSLATION_TABLE(name,sA,sB,sC,sD,sE,sF,sG,sDP) \
   char name[11]={ \
                   (1<<sG) | (1<<sDP), \
