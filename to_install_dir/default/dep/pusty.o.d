@@ -1,0 +1,1 @@
+pusty.o: ../pusty.c
