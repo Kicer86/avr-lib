@@ -29,7 +29,7 @@ template <byte modules, IOPort &data_port, IOPort &seg_port, byte segShift, cons
 class Disp7Seg
 {
         byte pos;      //pozycja
-        byte posShf;   //pozacja jako krążące 1
+        byte posShf;   //pozycja jako krążące 1
         volatile word onTime, offTime;  //miganie
         volatile byte values[modules];
 
@@ -48,19 +48,19 @@ class Disp7Seg
 
         void setValue(byte val[])
         {
-            for (int i = 0;i < modules;i++)
+            for (int i = 0; i < modules;i++)
                 values[i] = translation[val[i]];
         }
 
         void clear()
         {
-            for (int i = 0;i < modules;i++)
+            for (int i = 0; i < modules;i++)
                 values[i] = translation[0];
         }
 
         void setEmpty()
         {
-            for (int i = 0;i < modules;i++)
+            for (int i = 0; i < modules;i++)
                 values[i] = translation[10]; //pustka
         }
 
