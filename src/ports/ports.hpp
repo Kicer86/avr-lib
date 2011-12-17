@@ -18,23 +18,20 @@ class Port
         }
 
     protected:
-        typedef volatile byte port_t;
-        typedef port_t* port_ptr;
-
-        const Ports::Port addr;
+        const Ports::PortT addr;
 
         inline byte read() const
         {
-            return *( reinterpret_cast<port_t*> ( addr + SFR_OFFSET ) );
+            return *( addr + SFR_OFFSET );
         }
 
         inline void write(byte v) const
         {
-            *( reinterpret_cast<port_t*> ( addr + SFR_OFFSET ) ) = v;
+            *(addr + SFR_OFFSET) = v;
         }
 
     public:
-        constexpr Port(Ports::Port a): addr(a)
+        constexpr Port(Ports::PortT a): addr(a)
         {}
 
         inline const Port &operator=(byte v) const
@@ -48,19 +45,19 @@ class Port
             return read();
         }
 
-        inline const Port &operator|= ( byte v ) const
+        inline const Port &operator|=(byte v) const
         {
-            * ( reinterpret_cast<port_t*> ( addr+ SFR_OFFSET ) ) |=v;
+            *( addr + SFR_OFFSET ) |= v;
             return *this;
         }
 
-        inline const Port &operator&= ( byte v ) const
+        inline const Port &operator&=(byte v) const
         {
-            * ( reinterpret_cast<port_t*> ( addr+ SFR_OFFSET ) ) &=v;
+            *( addr + SFR_OFFSET ) &= v;
             return *this;
         }
 
-        inline Ports::Port address() const
+        inline Ports::PortT address() const
         {
             return addr;
         }
@@ -74,7 +71,7 @@ class IOPort:public Port
     public:
         const Port dir;
 
-        constexpr IOPort(Ports::Port a): 
+        constexpr IOPort(Ports::PortT a): 
             Port(a), 
             pin(a - 2),
             dir(a - 1)
@@ -91,17 +88,17 @@ class IOPort:public Port
             return *this;
         }
 
-        inline Ports::Port pinAddr() const
+        inline Ports::PortT pinAddr() const
         {
             return pin.address();
         }
 
-        inline Ports::Port ddrAddr() const
+        inline Ports::PortT ddrAddr() const
         {
             return dir.address();
         }
 
-        inline Ports::Port portAddr() const
+        inline Ports::PortT portAddr() const
         {
             return address();
         }

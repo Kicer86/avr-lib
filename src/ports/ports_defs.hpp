@@ -9,26 +9,26 @@
 
 namespace Ports
 {
-    typedef word Port;
+    typedef volatile byte * PortT;
 
 #ifdef PORTA
-    constexpr Port PortA = reinterpret_cast<word>(&PORTA);
+    constexpr PortT PortA = &PORTA;
 #endif    
     
 #ifdef PORTB
-    constexpr Port PortB = reinterpret_cast<word>(&PORTB);
+    constexpr PortT PortB = &PORTB;
 #endif
     
 #ifdef PORTC
-    constexpr Port PortC = reinterpret_cast<word>(&PORTC);
+    constexpr PortT PortC = &PORTC;
 #endif    
     
 #ifdef PORTD
-    constexpr Port PortD = reinterpret_cast<word>(&PORTD);
+    constexpr PortT PortD = &PORTD;
 #endif
     
 #ifdef PORTE
-    constexpr Port PortE = reinterpret_cast<word>(&PORTE);
+    constexpr PortT PortE = &PORTE;
 #endif     
 }
 
