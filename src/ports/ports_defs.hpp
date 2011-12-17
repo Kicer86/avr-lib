@@ -1,33 +1,35 @@
-#include "ports.hpp"
 
 #ifndef PORTS_DEFS_HPP
 #define PORTS_DEFS_HPP
 
 #include <avr/io.h>
 
+//#include "ports.hpp"
+#include "../common.hpp"
+
 namespace Ports
 {
-  enum PortsList
-  {
-    
-#if defined _AVR_IOMXX4_H_ || defined _AVR_IOMX8_H_       //procesory serii atmegaxx4 i atmegaxx8
-#if defined _AVR_IOMXX4_H_
-    PortA=0x02,                                           //port A tylko dla xx4 (pochodne mega16)
-#endif
-    PortB=0x05,
-    PortC=0x08,
-    PortD=0x0B
-#endif
+    typedef word Port;
 
-#if defined __AVR_ATmega8__ || defined __AVR_ATmega16__    //atmega8 i atmega16
-#if defined __AVR_ATmega16__
-    PortA=0x1B,                                            //port A tylko dla atmega16
+#ifdef PORTA
+    constexpr Port PortA = reinterpret_cast<word>(&PORTA);
+#endif    
+    
+#ifdef PORTB
+    constexpr Port PortB = reinterpret_cast<word>(&PORTB);
 #endif
-    PortB=0x18,
-    PortC=0x15,
-    PortD=0x12
+    
+#ifdef PORTC
+    constexpr Port PortC = reinterpret_cast<word>(&PORTC);
+#endif    
+    
+#ifdef PORTD
+    constexpr Port PortD = reinterpret_cast<word>(&PORTD);
 #endif
-  };
+    
+#ifdef PORTE
+    constexpr Port PortE = reinterpret_cast<word>(&PORTE);
+#endif     
 }
 
 #endif

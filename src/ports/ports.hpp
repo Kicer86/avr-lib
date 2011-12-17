@@ -3,203 +3,109 @@
 #define PORTS_HPP
 
 #include "../common.hpp"
-#define SFR_OFFSET 32
+#include "ports_defs.hpp"
 
-typedef word port_ptr;       //wskaźnik na port - do używania w template
-
-template<port_ptr addr>
-class TPort
-{
-    inline TPort(const TPort&)
-    {}
-
-    inline TPort &operator=(const TPort&)
-    {
-      return *this;
-    }
-
-  protected:
-    typedef volatile byte port_t;
-
-    inline byte read() const
-    {
-      return *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET));
-    }
-
-    inline void write(byte v) const
-    {
-      *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET))=v;
-    }
-
-  public:
-
-    TPort()
-    {}
-
-    inline const TPort &operator=(byte v) const
-    {
-      write(v);
-      return *this;
-    }
-
-    inline operator byte() const
-    {
-      return read();
-    }
-
-    inline const TPort &operator|=(byte v) const
-    {
-      *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET))|=v;
-      return *this;
-    }
-
-    inline const TPort &operator&=(byte v) const
-    {
-      *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET))&=v;
-      return *this;
-    }
-
-    inline port_ptr address() const
-    {
-      return addr;
-    }
-};
-
+#define SFR_OFFSET __SFR_OFFSET
 
 class Port
 {
-  inline Port(const Port&):addr(0)
-  {}
+        inline Port ( const Port& ) :addr ( 0 )
+        {}
 
-  inline Port &operator=(const Port&)
-  {
-    return *this;
-  }
+        inline Port &operator= ( const Port& )
+        {
+            return *this;
+        }
 
-protected:
-  typedef volatile byte port_t;
+    protected:
+        typedef volatile byte port_t;
+        typedef port_t* port_ptr;
 
-  port_ptr addr:4; //4 bajty starcza, porty io mają niskie wartości
+        const Ports::Port addr;
 
-  inline byte read() const
-  {
-    return *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET));
-  }
+        inline byte read() const
+        {
+            return *( reinterpret_cast<port_t*> ( addr + SFR_OFFSET ) );
+        }
 
-  inline void write(byte v) const
-  {
-    *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET))=v;
-  }
+        inline void write(byte v) const
+        {
+            *( reinterpret_cast<port_t*> ( addr + SFR_OFFSET ) ) = v;
+        }
 
-public:
+    public:
+        constexpr Port(Ports::Port a): addr(a)
+        {}
 
-  Port(port_ptr a):addr(a)
-  {}
+        inline const Port &operator=(byte v) const
+        {
+            write(v);
+            return *this;
+        }
 
-  inline const Port &operator=(byte v) const
-  {
-    write(v);
-    return *this;
-  }
+        inline operator byte() const
+        {
+            return read();
+        }
 
-  inline operator byte() const
-  {
-    return read();
-  }
+        inline const Port &operator|= ( byte v ) const
+        {
+            * ( reinterpret_cast<port_t*> ( addr+ SFR_OFFSET ) ) |=v;
+            return *this;
+        }
 
-  inline const Port &operator|=(byte v) const
-  {
-    *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET))|=v;
-    return *this;
-  }
+        inline const Port &operator&= ( byte v ) const
+        {
+            * ( reinterpret_cast<port_t*> ( addr+ SFR_OFFSET ) ) &=v;
+            return *this;
+        }
 
-  inline const Port &operator&=(byte v) const
-  {
-    *(reinterpret_cast<port_t*>(addr+ SFR_OFFSET))&=v;
-    return *this;
-  }
-
-  inline port_ptr address() const
-  {
-    return addr;
-  }
-};
-
-
-template<port_ptr baseAddr>
-class TIOPort:public TPort<baseAddr>
-{
-    const TPort<baseAddr-2> pin;
-
-  public:
-    const TPort<baseAddr-1> dir;
-
-    inline TIOPort():TPort<baseAddr>(),pin(),dir()
-    {}
-
-    inline byte operator()() const
-    {
-      return pin;
-    }
-
-    inline const TIOPort &operator=(byte v) const
-    {
-      TPort<baseAddr>::write(v);
-      return *this;
-    }
-
-    inline port_ptr pinAddr() const
-    {
-      return pin.address();
-    }
-
-    inline port_ptr ddrAddr() const
-    {
-      return dir.address();
-    }
-
-    inline port_ptr portAddr() const
-    {
-      return TPort<baseAddr>::address();
-    }
+        inline Ports::Port address() const
+        {
+            return addr;
+        }
 };
 
 
 class IOPort:public Port
 {
-  const Port pin;
+        const Port pin;
 
-public:
-  const Port dir;
+    public:
+        const Port dir;
 
-  inline IOPort(port_ptr a):Port(a),pin(a-2),dir(a-1)
-  {}
+        constexpr IOPort(Ports::Port a): 
+            Port(a), 
+            pin(a - 2),
+            dir(a - 1)
+        {}
 
-  inline byte operator()() const
-  {
-    return pin;
-  }
+        inline byte operator() () const
+        {
+            return pin;
+        }
 
-  inline const IOPort &operator=(byte v) const
-  {
-    write(v);
-    return *this;
-  }
+        inline const IOPort &operator=(byte v) const
+        {
+            write(v);
+            return *this;
+        }
 
-  inline port_ptr pinAddr() const
-  {
-    return pin.address();
-  }
+        inline Ports::Port pinAddr() const
+        {
+            return pin.address();
+        }
 
-  inline port_ptr ddrAddr() const
-  {
-    return dir.address();
-  }
+        inline Ports::Port ddrAddr() const
+        {
+            return dir.address();
+        }
 
-  inline port_ptr portAddr() const
-  {
-    return address();
-  }
+        inline Ports::Port portAddr() const
+        {
+            return address();
+        }
 };
+
 
 #endif //PORTS_HPP
