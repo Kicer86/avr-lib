@@ -25,7 +25,7 @@
                 }
 
 
-template <byte modules, port_ptr data_port, port_ptr seg_port, byte segShift, const char * translation>
+template <byte modules, IOPort &data_port, IOPort &seg_port, byte segShift, const char * translation>
 class Disp7Seg
 {
     byte pos;      //pozycja
@@ -36,14 +36,12 @@ class Disp7Seg
   public:
     Disp7Seg():pos(0),posShf(1), onTime(1), offTime(1)
     {
-      const TIOPort<data_port> dataPort;
-      const TIOPort<seg_port> segPort;
       const byte modMask=(1<<modules)-1;
 
-      dataPort.dir=0xff;              //wyjścia
-      dataPort=0xff;                  //stan wysoki
-      segPort.dir|=modMask << segShift;
-      segPort|=modMask << segShift;   //stan wysoki
+      data_port.dir=0xff;              //wyjścia
+      data_port=0xff;                  //stan wysoki
+      seg_port.dir|=modMask << segShift;
+      seg_port|=modMask << segShift;   //stan wysoki
 
       clear();
     }
@@ -76,21 +74,19 @@ class Disp7Seg
 
     void interrupt()
     {
-      const TIOPort<data_port> dataPort;
-      const TIOPort<seg_port> segPort;
       const byte modMask=(1<<modules)-1;
       static word cycle;
 
       //wygaś kolumny (stan wysoki)
-      segPort|=modMask << segShift;    //stan wysoki
+      seg_port|=modMask << segShift;    //stan wysoki
 
       if (cycle++<onTime)              //świeć tylko jesli dany cykl zawiera się w czasie świecenia
       {
         //wystaw nowa wartość
-        dataPort=values[pos];
+        data_port=values[pos];
 
         //załącz daną kolumnę
-        segPort&=~(posShf<<segShift);
+        seg_port&=~(posShf<<segShift);
       }
 
       if (cycle>=offTime)              //przekroczne granice cyklu?
