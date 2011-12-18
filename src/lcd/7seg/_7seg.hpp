@@ -72,6 +72,7 @@ class Disp7Seg
             offTime = f;
         }
 
+        //this function has to be called frequently, to make display work
         void interrupt()
         {
             const byte modMask = (1 << modules) - 1;
