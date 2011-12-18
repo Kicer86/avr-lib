@@ -5,7 +5,15 @@
 #include "../common.hpp"
 #include "ports_defs.hpp"
 
-#define SFR_OFFSET __SFR_OFFSET
+#define SFR_OFFSET 0 //__SFR_OFFSET
+
+
+//Ports, to be well optimized, require -fwhole-program (if one file is being compiled)
+//or -flto (for compilation) + -fwhole-program -flto (for linking).
+
+//If you don'w want to use those options, declare all Ports as local (stack) variables or 
+//as global objects (but with static keyword).
+//This will make them incompatible with all Port related templates from this library
 
 class Port
 {
