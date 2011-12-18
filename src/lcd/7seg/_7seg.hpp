@@ -76,7 +76,7 @@ class Disp7Seg
         void interrupt()
         {
             const byte modMask = (1 << modules) - 1;
-            static word cycle;
+            static word cycle = 0;
 
             //wygaś kolumny (stan wysoki)
             seg_port |= modMask << segShift;  //stan wysoki
