@@ -25,7 +25,7 @@
                   }
 
 
-template <byte modules, IOPort &data_port, IOPort &seg_port, byte segShift, const char * translation>
+template <byte modules, IOPort &data_port, IOPort &seg_port, byte segShift, const char *translation, byte dataShift = 0>
 class Disp7Seg
 {
         byte pos;      //pozycja
@@ -37,11 +37,12 @@ class Disp7Seg
         Disp7Seg(): pos(0), posShf(1), onTime(1), offTime(1)
         {
             const byte modMask = (1 << modules) - 1;
+            const byte dataMask = translation == nullptr? 0x0f : 0xff;
 
-            data_port.dir = 0xff;            //wyjścia
-            data_port = 0xff;                //stan wysoki
-            seg_port.dir |= modMask << segShift;
-            seg_port |= modMask << segShift; //stan wysoki
+            data_port.dir = dataMask << dataShift; //wyjścia
+            data_port = dataMask << dataShift;     //stan wysoki
+            seg_port.dir |= modMask << segShift;   //wyjścia
+            seg_port |= modMask << segShift;       //stan wysoki
 
             clear();
         }
