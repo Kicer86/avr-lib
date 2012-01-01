@@ -6,6 +6,17 @@
 #include "../../ports/ports.hpp"
 
 
+//object of class Disp7Seg can work in two modes:
+//1. with translation table (software 7seg decoding)
+//2. without translation table (hardware 7seg decoding)
+//When in first mode, translation cannot be equal to null ptr.
+//On data port, catodes of LEDs have to be connected (LED is activated by low state on port's pin).
+//On seg port, pnp transistor is expected (activated by low state).
+//In second mode, on data port current serving led decoder is expected.
+//Data port will output data as binary code.
+//On seg port npn transistor is expected (connected to LED's cotode). (LED activated by high state on port's pin)
+
+
 //makro do tworzenia kodów wyświetlaczy 7 segmentowych
 //name - nazwa powstałej tabeli
 //kolejne wartości -> numery pinów portu pod którymi znajdują się dane segmenty
@@ -36,6 +47,8 @@ class Disp7Seg
     public:
         Disp7Seg(): pos(0), posShf(1), onTime(1), offTime(1)
         {
+            static_assert(translation == nullptr || dataShift == 0, "If translation table is provided, data cannot be shifted");
+            
             const byte modMask = (1 << modules) - 1;
             const byte dataMask = translation == nullptr? 0x0f : 0xff;
 
@@ -50,7 +63,10 @@ class Disp7Seg
         void setValue(byte val[])
         {
             for (int i = 0; i < modules;i++)
-                values[i] = translation[val[i]];
+                if (translation != nullptr)
+                    values[i] = translation[val[i]];
+                else
+                    values[i] = val[i];      //no translation
         }
 
         void clear()
@@ -77,21 +93,36 @@ class Disp7Seg
         void interrupt()
         {
             const byte modMask = (1 << modules) - 1;
+            const byte dataMask = (translation == nullptr? 0x0f : 0xff) << dataShift;
             static word cycle = 0;
 
-            //wygaś kolumny (stan wysoki)
-            seg_port |= modMask << segShift;  //stan wysoki
+            //wygaś kolumny
+            if (translation != nullptr)
+                seg_port |= modMask << segShift;     //high
+            else
+                seg_port &= ~(modMask << segShift);  //low
 
-            if (cycle++ < onTime)            //świeć tylko jesli dany cykl zawiera się w czasie świecenia
+            if (cycle++ < onTime)             //świeć tylko jesli dany cykl zawiera się w czasie świecenia
             {
                 //wystaw nowa wartość
-                data_port = values[pos];
+                if (translation != nullptr)   //translation? use whole port
+                    data_port = values[pos];
+                else
+                {
+                    byte port_val = data_port;   //read value send to port
+                    port_val &= ~dataMask;       //clear value
+                    port_val |= values[pos] << dataShift;  //set value
+                    data_port = port_val;        //send it to port
+                }
 
                 //załącz daną kolumnę
-                seg_port &= ~(posShf << segShift);
+                if (translation != nullptr)
+                    seg_port &= ~(posShf << segShift);  //low
+                else
+                    seg_port |= posShf << segShift;     //high
             }
 
-            if (cycle >= offTime)            //przekroczne granice cyklu?
+            if (cycle >= offTime)              //przekroczne granice cyklu?
                 cycle = 0;                     //restart
 
             //przejście do następnej kolumny
