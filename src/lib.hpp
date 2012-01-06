@@ -7,6 +7,7 @@
 int main() __attribute__((noreturn));
 extern "C" void atexit( void ) {}
 extern "C" void __cxa_pure_virtual() {}
+extern "C" void __cxa_atexit() {}
 void operator delete(void*) {}
 
 

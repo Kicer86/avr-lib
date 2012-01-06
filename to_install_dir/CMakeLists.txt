@@ -1,6 +1,9 @@
-set(BASE_DIR "/home/michal/projects/root/usr/avr") #katalog bazowy
 
-include (${BASE_DIR}/cpus/CMakeLists.txt)   #targety związane z instalacją, fuse bitami etc
+cmake_minimum_required(VERSION 2.8)
+
+set(BASE_DIR "${CMAKE_INSTALL_PREFIX}/avr")                #katalog bazowy
+
+include ("${CMAKE_CURRENT_LIST_DIR}/cpus/CMakeLists.txt")  #targety związane z instalacją, fuse bitami etc
 
 macro (avr_module)
   set (VARIABLE_NAME "MODULE_NAME")
@@ -73,7 +76,7 @@ macro (avr_module)
   #podstawowe flagi
   set(COMMON_FLAGS ${MMCU} ${MODULE_FLAGS})
   set(LDFLAGS ${COMMON_FLAGS})
-  set(LDFLAGS ${LDFLAGS} -Wl,--relax -Wl,-static ) #-Wl,--gc-sections  -Wl,--warn-common
+  set(LDFLAGS ${LDFLAGS} -Wl,--relax -Wl,-static -Wl,--gc-sections  -Wl,--warn-common)
   set(LDFLAGS ${LDFLAGS} -Wl,-O1 -fwhole-program)
 
   #dodatkowe biblioteki
@@ -97,7 +100,7 @@ macro (avr_module)
   #dołącz flagi optymalizacyjne
   if (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
     if (MODULE_BUILD_TYPE MATCHES "Speed|speed")
-      set(CFLAGS ${CFLAGS} -O2)
+      set(CFLAGS ${CFLAGS} -O3)
     else(MODULE_BUILD_TYPE)
       set(CFLAGS ${CFLAGS} -Os)   
     endif(MODULE_BUILD_TYPE MATCHES "Speed|speed")
@@ -109,14 +112,16 @@ macro (avr_module)
       set(CFLAGS ${CFLAGS} -frename-registers)          #niewiele zmienia ale kod chyba bardziej logicznie wygląda
     endif (MODULE_DEBUG STREQUAL "true")
 
-#      set(CFLAGS ${CFLAGS} -ffunction-sections -fdata-sections )
+    set(CFLAGS ${CFLAGS} -fuse-cxa-atexit)
+    
+    set(CFLAGS ${CFLAGS} -ffunction-sections -fdata-sections )   #this works only with -Wl,--gc-sections and (probably) -fuse-cxa-atexit
     set(CFLAGS ${CFLAGS} -fno-tree-scev-cprop)   #czasem pomaga
-#     set(CFLAGS ${CFLAGS} -fno-split-wide-types) #czasem pomaga, czasem przeszkadza
+    set(CFLAGS ${CFLAGS} -fno-split-wide-types) #czasem pomaga, czasem przeszkadza
     set(CFLAGS ${CFLAGS} -fmerge-all-constants)
     set(CFLAGS ${CFLAGS} -finline-small-functions)
 
-#   else (MODULE_BUILD_TYPE)  #debug
-#     set(CFLAGS ${CFLAGS} -O0 -g -gdwarf-2)
+  else (MODULE_BUILD_TYPE)  #debug
+    set(CFLAGS ${CFLAGS} -O0 -g -gdwarf-2)
   endif (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
 
   #dołącz ostrzeżenia i flagi ogólne
@@ -194,6 +199,7 @@ macro (avr_module)
   #target ostateczny - różny dla programu i biblioteki
   set (TARGET_FILE "")
   if ("${MODULE_MODE}" STREQUAL "program")
+  
     message("Generating targets for program ${MODULE_NAME}")
     set(TARGET_FILE ${MODULE_NAME}.elf)
     add_custom_target(${MODULE_NAME} ALL DEPENDS ${TARGET_FILE} ${MODULE_NAME}.size ${MODULE_NAME}.lst ${MODULE_NAME}.diff ${MODULE_NAME}.hex ${MODULE_NAME}.eep ${MODULE_NAME}.eep.bin)
@@ -206,6 +212,7 @@ macro (avr_module)
     )
 
   elseif ("${MODULE_MODE}" STREQUAL "library")
+  
     message("Generating targets for library ${MODULE_NAME}")
     set(TARGET_FILE lib${MODULE_NAME}.info)
 
@@ -238,8 +245,11 @@ macro (avr_module)
     install (FILES ${MODULE_SOURCES} 
              DESTINATION ${BASE_DIR}/${MODULE_INC_PATH}
              PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+             
   else ("${MODULE_MODE}" STREQUAL "program")
+ 
     message(FATAL_ERROR "invalid module mode: ${MODULE_MODE}")
+    
   endif("${MODULE_MODE}" STREQUAL "program")
 
   add_custom_command(
