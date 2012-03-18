@@ -8,7 +8,7 @@
 
 #include "common.hpp"
 
-const float tics_per_mhz=F_CPU/1e6;
+constexpr float tics_per_mhz=F_CPU/1e6;
 
 class Delay
 {
@@ -60,7 +60,7 @@ class Delay
       }
       else if (ticks>770)
       {
-        //static_assert((ticks-1)/4<=65536, "Too big loop for delay_us");
+        static_assert((ticks-1)/4<=65536, "Too big loop for delay_us");
         byte t1,t2;
         const word loops=((ticks-1)/4) & 0xffff;     //liczba pętli = rządany czas / koszt całej pętli (jeden rozkaz jest nadmiarowy, trzeba go odjąc)
         const byte l=loops & 0xff;

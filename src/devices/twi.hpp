@@ -18,8 +18,6 @@ class Twi
         }
         
         ~Twi() {}
-        
-        
 };
 
 #endif
