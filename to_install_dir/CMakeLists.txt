@@ -107,11 +107,11 @@ macro (avr_module)
 
     if (MODULE_DEBUG STREQUAL "true")
       set(CFLAGS ${CFLAGS} -g -gdwarf-2) 
-    else(MODULE_DEBUG STREQUAL "true")
-      set(CFLAGS ${CFLAGS} -flto)
-      set(CFLAGS ${CFLAGS} -frename-registers)          #niewiele zmienia ale kod chyba bardziej logicznie wygląda
     endif (MODULE_DEBUG STREQUAL "true")
-
+    
+    set(CFLAGS ${CFLAGS} -flto)
+    set(CFLAGS ${CFLAGS} -frename-registers)          #niewiele zmienia ale kod chyba bardziej logicznie wygląda
+    
     set(CFLAGS ${CFLAGS} -fuse-cxa-atexit)
     
     set(CFLAGS ${CFLAGS} -ffunction-sections -fdata-sections )   #this works only with -Wl,--gc-sections and (probably) -fuse-cxa-atexit
