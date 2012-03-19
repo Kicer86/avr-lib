@@ -83,11 +83,15 @@ class Delay
       }
     }
 
-    static void ms(word delay)
-    {
-      for (word i=0; i<delay; i++)
-        us<1000>();
-    }
+    
+    static void ms(word delay) __attribute__((cold)); //without "cold" delay's body may not become a simple loop, which is not what we want
 };
+
+
+void Delay::ms(word delay)
+{
+    for (word i=0; i<delay; i++)
+        us<1000>();
+}
 
 #endif
