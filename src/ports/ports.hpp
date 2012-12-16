@@ -17,13 +17,6 @@
 
 class Port
 {
-        inline Port ( const Port& ) :addr ( 0 )
-        {}
-
-        inline Port &operator= ( const Port& )
-        {
-            return *this;
-        }
 
     protected:
         const Ports::PortT addr;
@@ -41,6 +34,8 @@ class Port
     public:
         constexpr Port(Ports::PortT a): addr(a)
         {}
+        
+        Port(const Port&) = delete;
 
         inline const Port &operator=(byte v) const
         {
@@ -69,10 +64,12 @@ class Port
         {
             return addr;
         }
+        
+        Port& operator= ( const Port& ) = delete;
 };
 
 
-class IOPort:public Port
+class IOPort: public Port
 {
         const Port pin;
 
