@@ -1,0 +1,4 @@
+ 
+set(AVR_CPP_LIB_INCLUDE @BASE_DIR@/include)
+set(AVR_CPP_LIB_DATA    @BASE_DIR@/share/avrCppLib)
+set(AVR_CPP_LIB_LIB     @BASE_DIR@/lib)
