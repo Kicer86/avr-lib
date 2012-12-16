@@ -30,84 +30,37 @@
 // }
 
 #define FLASH(name) \
-  __attribute__((section(".progmem."#name)))
+    __attribute__((section(".progmem."#name)))
 
-class Com
+namespace common
 {
-    static const byte FLASH(shiftTable8) shiftTable8[8];
-    static const word FLASH(shiftTable16) shiftTable16[16];
-    
-  public:
-    static byte readFlash8(const byte *ptr)    //czytanie flasha, nie wymaga includowania avr/pgmspace, w zamian wymagając procesorów >=avr25
-    {
-      byte ret;
-      asm (
-        "lpm %0,Z    \n\t"
-        :"=r"(ret)
-        :"z"(ptr)
-          );
-      return ret;
-    }
-
-    static char readFlash8(const char *ptr)
-    {
-      char ret;
-      asm (
-        "lpm %0,Z    \n\t"
-      :"=r"(ret)
-            :"z"(ptr)
-          );
-      return ret;
-    }
-
-    static word readFlash16(const word *ptr)
-    {
-      word ret;
-      asm
-      (
-        "lpm %A0,Z+    \n\t"
-        "lpm %B0,Z     \n\t"
-      :"=r"(ret)
-            :"z"(ptr)
-          );
-      return ret;
-    }
-
-    static byte fastShift8(byte v)             //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==7)
-    {
-      return readFlash8(&shiftTable8[v]);
-    }
-
-    static word fastShift16(byte v)            //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==15)
-    {
-      return readFlash16(&shiftTable16[v]);
-    }
-    
-    static byte byte2hex(byte v)
-    {
-      v&=0xf;
-      return v<10? '0'+v : 'A'+v-10;
-    }
-};
+    static byte readFlash8(const byte *ptr);    //czytanie flasha, nie wymaga includowania avr/pgmspace, w zamian wymagając procesorów >=avr25
+    static char readFlash8(const char *ptr);
+    static word readFlash16(const word *ptr);
+    static byte fastShift8(byte v);            //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==7)
+    static word fastShift16(byte v);           //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==15)
+    static byte byte2hex(byte v);
+}
 
 
 class Interrupts
 {
-  byte flags;
-public:
-  Interrupts():flags(0)
-  {};
-  
-  void disable()
-  {
-    flags=SREG;
-    cli();
-  }
-  
-  void restore() const
-  {
-    SREG=flags;
-  }
+        byte flags;
+        
+    public:
+        Interrupts(): flags(0)
+        {};
+
+        void disable()
+        {
+            flags = SREG;
+            cli();
+        }
+
+        void restore() const
+        {
+            SREG = flags;
+        }
 };
 
 #endif //COMMON_HPP
