@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set(BASE_DIR "${CMAKE_INSTALL_PREFIX}/avr")                #katalog bazowy
 
-include ("${CMAKE_CURRENT_LIST_DIR}/cpus/CMakeLists.txt")  #targety związane z instalacją, fuse bitami etc
+include ("${CMAKE_CURRENT_LIST_DIR}/cpus/cpus.cmake")      #targety związane z instalacją, fuse bitami etc
 
 macro (avr_module)
   set (VARIABLE_NAME "MODULE_NAME")

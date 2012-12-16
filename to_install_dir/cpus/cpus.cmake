@@ -1,7 +1,7 @@
 function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
 
   if ( NOT (MODULE_NAME AND MODULE_CPU AND MODULE_FCPU))
-    message(FATAL_ERROR "This file can be included only by main CMakeLists.txt")
+    message(FATAL_ERROR "This file can be included only by avrCppLib.cmake")
   endif( NOT (MODULE_NAME AND MODULE_CPU AND MODULE_FCPU))
 
   set (AVRDUDE_FLAGS -c stk500v2 -p ${MODULE_CPU} -P avrdoper)
