@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 add_subdirectory("tools")       #some extra tools
 
-include("to_install_dir/CMakeLists.txt")
+include("to_install_dir/avrCppLib.cmake")
 
 avr_module(display
   MODULE_HEADERS src/lcd/display.hpp src/lcd/font.h
@@ -80,7 +80,7 @@ install (DIRECTORY to_install_dir/cpus
 		 FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
 		 DIRECTORY_PERMISSIONS  OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 		 
-install (FILES to_install_dir/info to_install_dir/CMakeLists.txt
+install (FILES to_install_dir/info to_install_dir/avrCppLib.cmake
 	     DESTINATION ${BASE_DIR}/share/avrCppLib
 	     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
 
