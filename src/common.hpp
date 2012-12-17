@@ -34,12 +34,12 @@
 
 namespace common
 {
-    static byte readFlash8(const byte *ptr);    //czytanie flasha, nie wymaga includowania avr/pgmspace, w zamian wymagając procesorów >=avr25
-    static char readFlash8(const char *ptr);
-    static word readFlash16(const word *ptr);
-    static byte fastShift8(byte v);            //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==7)
-    static word fastShift16(byte v);           //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==15)
-    static byte byte2hex(byte v);
+    byte readFlash8(const byte *ptr);    //czytanie flasha, nie wymaga includowania avr/pgmspace, w zamian wymagając procesorów >=avr25
+    char readFlash8(const char *ptr);
+    word readFlash16(const word *ptr);
+    byte fastShift8(byte v);            //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==7)
+    word fastShift16(byte v);           //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==15)
+    byte byte2hex(byte v);
 }
 
 
