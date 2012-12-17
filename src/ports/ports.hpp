@@ -15,11 +15,19 @@
 //as global objects (but with static keyword).
 //This will make them incompatible with all Port related templates from this library
 
+namespace
+{
+    constexpr Ports::PortAddr convert(Ports::PortT t)
+    {
+        return reinterpret_cast<Ports::PortAddr>(t);
+    }
+}
+
 class Port
 {
 
-    protected:
-        const Ports::PortT addr;
+    protected:       
+        const Ports::PortAddr addr;
 
         inline byte read() const
         {
@@ -32,7 +40,7 @@ class Port
         }
 
     public:
-        constexpr Port(Ports::PortT a): addr(a)
+        constexpr Port(Ports::PortT a): addr(convert(a))
         {}
         
         Port(const Port&) = delete;
@@ -60,7 +68,7 @@ class Port
             return *this;
         }
 
-        inline Ports::PortT address() const
+        inline Ports::PortAddr address() const
         {
             return addr;
         }
@@ -93,17 +101,17 @@ class IOPort: public Port
             return *this;
         }
 
-        inline Ports::PortT pinAddr() const
+        inline Ports::PortAddr pinAddr() const
         {
             return pin.address();
         }
 
-        inline Ports::PortT ddrAddr() const
+        inline Ports::PortAddr ddrAddr() const
         {
             return dir.address();
         }
 
-        inline Ports::PortT portAddr() const
+        inline Ports::PortAddr portAddr() const
         {
             return address();
         }
