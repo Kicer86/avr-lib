@@ -59,108 +59,109 @@
 template<Ports::PortT data_port, byte dataShift, Ports::PortT ctrl_port, byte rsPos, byte ePos>
 class HD44780
 {
-    void writeNibble(byte nibble) const
-    {
-      IOPort dataPort(data_port);
-      IOPort ctrlPort(ctrl_port);
+    public:
+        HD44780()
+        {
+            IOPort dataPort(data_port);
+            IOPort ctrlPort(ctrl_port);
 
-      ctrlPort|=(1<<ePos);
-      dataPort&=~( (0xf << dataShift) &0xff );
-      dataPort|=(nibble & 0xf) << dataShift;
-      ctrlPort&=~(1<<ePos);
-    }
-
-    void writeData(byte data) const
-    {
-      IOPort ctrlPort(ctrl_port);
-
-      ctrlPort|=(1<<rsPos);
-      writeNibble(data>>4);
-      writeNibble(data);
-
-      Delay::ms(2);
-      /*
-       clr   XH
-      ldi   XL,250
-      rcall Wait4xCycles
-      */
-    }
-
-    void writeCommand(byte cmd)
-    {
-      IOPort ctrlPort(ctrl_port);
-
-      ctrlPort&=~(1<<rsPos);
-      writeNibble(cmd>>4);
-      writeNibble(cmd);
-
-      Delay::ms(2);
-    }
-
-    void init()
-    {
-      IOPort dataPort(data_port);
-
-      Delay::ms(100);   //najgorszy przypadek - zasilanie 2,7V
-
-      for (byte i=0; i<3; i++)
-      {
-        writeNibble(0x03);
-        Delay::ms(5);
-      }
-
-      writeNibble(0x02);
-      Delay::ms(1);
-
-      writeCommand(HD44780_FUNCTION_SET | HD44780_FONT5x7 | HD44780_TWO_LINE | HD44780_4_BIT);
-      writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_OFF);
-      writeCommand(HD44780_CLEAR);
-      writeCommand(HD44780_ENTRY_MODE |HD44780_EM_SHIFT_CURSOR | HD44780_EM_INCREMENT);
-      writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_ON | HD44780_CURSOR_OFF | HD44780_CURSOR_NOBLINK);
-    }
-
-  public:
-    HD44780()
-    {
-      IOPort dataPort(data_port);
-      IOPort ctrlPort(ctrl_port);
-
-      dataPort.dir|=0xf<<dataShift;
-      ctrlPort.dir|=(1<<rsPos) /*| (1<<rwPos)*/ | (1<<ePos);
+            dataPort.dir |= 0xf << dataShift;
+            ctrlPort.dir |= (1 << rsPos) /*| (1<<rwPos)*/ | (1 << ePos);
 //       ctrlPort&=~(1<<rwPos);    //force write only
-      
-      init();
-    }
 
-    void write_PString(const char *str)
-    {
-      byte data;
-      while ( (data=common::readFlash8(str++))!=0)
-        writeChar(data);
-    }
-    
-    void writeString(const char *str)
-    {
-      byte data;
-      while ( (data=*str++)!=0)
-        writeChar(data);
-    }
+            init();
+        }
 
-    void setAddressDD(byte addr)
-    {
-      writeCommand( addr| HD44780_DDRAM_SET);
-    }
-    
-    void writeChar(char c)
-    {
-      writeData(c);
-    }
+        void write_PString(const char *str)
+        {
+            byte data;
+            while ( (data = common::readFlash8(str++)) != 0)
+                writeChar(data);
+        }
 
-    void writeHex(byte c)
-    {
-      writeData(common::byte2hex(c>>4));
-      writeData(common::byte2hex(c));
-    }
+        void writeString(const char *str)
+        {
+            byte data;
+            while ( (data = *str++) != 0)
+                writeChar(data);
+        }
+
+        void setAddressDD(byte addr)
+        {
+            writeCommand( addr | HD44780_DDRAM_SET);
+        }
+
+        void writeChar(char c)
+        {
+            writeData(c);
+        }
+
+        void writeHex(byte c)
+        {
+            writeData(common::byte2hex(c >> 4));
+            writeData(common::byte2hex(c));
+        }
+
+    private:
+        void writeNibble(byte nibble) const
+        {
+            IOPort dataPort(data_port);
+            IOPort ctrlPort(ctrl_port);
+
+            ctrlPort |= (1 << ePos);
+            dataPort &= ~( (0xf << dataShift) & 0xff );
+            dataPort |= (nibble & 0xf) << dataShift;
+            ctrlPort &= ~(1 << ePos);
+        }
+
+        void writeData(byte data) const
+        {
+            IOPort ctrlPort(ctrl_port);
+
+            ctrlPort |= (1 << rsPos);
+            writeNibble(data >> 4);
+            writeNibble(data);
+
+            Delay::ms(2);
+            /*
+             clr   XH
+            ldi   XL,250
+            rcall Wait4xCycles
+            */
+        }
+
+        void writeCommand(byte cmd)
+        {
+            IOPort ctrlPort(ctrl_port);
+
+            ctrlPort &= ~(1 << rsPos);
+            writeNibble(cmd >> 4);
+            writeNibble(cmd);
+
+            Delay::ms(2);
+        }
+
+        void init()
+        {
+            IOPort dataPort(data_port);
+
+            Delay::ms(100);   //najgorszy przypadek - zasilanie 2,7V
+
+            for (byte i = 0; i < 3; i++)
+            {
+                writeNibble(0x03);
+                Delay::ms(5);
+            }
+
+            writeNibble(0x02);
+            Delay::ms(1);
+
+            writeCommand(HD44780_FUNCTION_SET | HD44780_FONT5x7 | HD44780_TWO_LINE | HD44780_4_BIT);
+            writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_OFF);
+            writeCommand(HD44780_CLEAR);
+            writeCommand(HD44780_ENTRY_MODE | HD44780_EM_SHIFT_CURSOR | HD44780_EM_INCREMENT);
+            writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_ON | HD44780_CURSOR_OFF | HD44780_CURSOR_NOBLINK);
+        }
 };
 
 /*
