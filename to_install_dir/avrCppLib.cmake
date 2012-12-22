@@ -82,7 +82,8 @@ macro (avr_module)
   #dodatkowe biblioteki
   set(LIB_SOURCES "")
   foreach(LIB ${MODULE_EXT_LIBRARIES})
-    set(LIB_SOURCES ${LIB_SOURCES} ${BASE_DIR}/lib/lib${LIB}.a)
+    include(${BASE_DIR}/lib/lib${LIB}.info)
+    set(LIB_SOURCES ${LIB_SOURCES} ${lib${LIB}})
   endforeach(LIB ${MODULE_EXT_LIBRARIES})
   
   if (NOT EXISTS libs)
@@ -124,27 +125,34 @@ macro (avr_module)
   endif (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
 
   #dołącz ostrzeżenia i flagi ogólne
-  set(CFLAGS ${CFLAGS} -W -Wall -Wextra -Winit-self -Wformat=2 -Wshadow -Wlogical-op -Winline)
+  set(CFLAGS ${CFLAGS} -W -Wall -Wextra -Winit-self -Wformat=2 -Wshadow -Wlogical-op) #-Winline
   set(CFLAGS ${CFLAGS} -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums )
   set(CFLAGS ${CFLAGS} -ffreestanding -save-temps)
 
   #flagi dla c++
-  set(CPPFLAGS ${CFLAGS} -pedantic -Weffc++)  
-  set(CPPFLAGS ${CPPFLAGS} -fno-threadsafe-statics -fno-exceptions -fno-rtti)
+  set(CPPFLAGS ${CFLAGS} -pedantic -fno-exceptions -fno-rtti) # -Weffc++)  
+  set(CPPFLAGS ${CPPFLAGS} -fno-threadsafe-statics)
 
   #standardy i przerzucenie CFLAGS bądź CPPFLAGS do FLAGS
   if ("${MODULE_TYPE}" STREQUAL "C")
     set(FLAGS ${CFLAGS} -std=gnu99)
   else ("${MODULE_TYPE}")
-    set(FLAGS ${CPPFLAGS} -std=c++11)
+    set(FLAGS ${CPPFLAGS} -std=c++0x)
   endif ("${MODULE_TYPE}" STREQUAL "C")
 
   #dodaj reguły dla plików bibliotecznych
-  set(LDFLAGS ${LDFLAGS} ${LIB_SOURCES})
+  foreach(LIB ${LIB_SOURCES})
+    get_filename_component(FILENAME ${LIB} NAME)  #wyodrębnij nazwę pliku
+    add_custom_command(
+      OUTPUT libs/${FILENAME}.o
+      COMMAND ${COMPILER}
+      ARGS ${FLAGS} -c -o libs/${FILENAME}.o ${LIB}
+    )
+    set(MODULE_OBJECTS libs/${FILENAME}.o ${MODULE_OBJECTS})
+  endforeach(LIB ${LIB_SOURCES})
   
   #argumenty przemielone, tworzymy targety dla kazdego pliku źródłowego
   foreach(SRC ${MODULE_SOURCES})
-  
     set(OBJECT ${SRC}.o)
     set(MODULE_OBJECTS ${OBJECT} ${MODULE_OBJECTS})
     set(SOURCE_FILE "")
@@ -186,7 +194,6 @@ macro (avr_module)
       COMMAND ${COMPILER}
       ARGS ${FLAGS} -c -o ${OBJECT} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}
     )
-    
   endforeach(SRC) #koniec regul dla pojedynczych plików źródłowych
 
   #target ostateczny - różny dla programu i biblioteki
@@ -207,26 +214,35 @@ macro (avr_module)
   elseif ("${MODULE_MODE}" STREQUAL "library")
   
     message("Generating targets for library ${MODULE_NAME}")
-    set(TARGET_FILE lib${MODULE_NAME}.a)
+    set(TARGET_FILE lib${MODULE_NAME}.info)
 
     if (NOT "${MODULE_SOURCES}" STREQUAL "")
-    
       add_custom_target(${MODULE_NAME} ALL DEPENDS ${TARGET_FILE}) #${MODULE_NAME}.size ${MODULE_NAME}.lst ${MODULE_NAME}.diff)
+
+      #zapisz pliki cpp biblioteki w pliku info (uwzględniając ich koncową lokalizację)
+      set(NAKED_NAMES "")
+      foreach(SRC ${MODULE_SOURCES}) 
+        #wyodrębnij nazwę pliku źródłowego
+        get_filename_component(FILENAME ${SRC} NAME)        
+        set(NAKED_NAMES ${BASE_DIR}/${MODULE_INC_PATH}/${FILENAME} ${NAKED_NAMES})  #dopisz do listy
+      endforeach(SRC ${MODULE_SOURCES})
       
-      #stwórz bibliotekę statyczną
+      #stwórz plik info zawierający listę plików do skompilowania w momencie kompilacji projektu głównego
       add_custom_command(
         OUTPUT ${TARGET_FILE}
         DEPENDS ${MODULE_OBJECTS}
-        COMMAND avr-ar rcs ${TARGET_FILE} ${MODULE_OBJECTS}
+        COMMAND echo 'set(lib${MODULE_NAME} ${NAKED_NAMES})' > ${TARGET_FILE}
       )
 
       install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_FILE} 
                DESTINATION ${BASE_DIR}/${MODULE_LIB_PATH}
                PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
-               
     endif (NOT "${MODULE_SOURCES}" STREQUAL "")
 
     install (FILES ${MODULE_HEADERS} 
+             DESTINATION ${BASE_DIR}/${MODULE_INC_PATH}
+             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+    install (FILES ${MODULE_SOURCES} 
              DESTINATION ${BASE_DIR}/${MODULE_INC_PATH}
              PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
              
