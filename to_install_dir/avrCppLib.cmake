@@ -15,7 +15,7 @@ macro (avr_module)
   set (MODULE_EXT_LIBRARIES "")           #lista dodatkowych bibliotek potrzebych do zlinkowania programu (np se1520 graphic)
   set (MODULE_BIN_PATH "bin")             #ścieżka (względem BASE_DIR) do instalowania binariów
   set (MODULE_INC_PATH "include")         #ścieżka (względem BASE_DIR) do instalowania plików nagłówkowych
-  set (MODULE_LIB_PATH "lib")             #ścieżka (względem BASE_DIR) do instalowania bibliotek
+  set (MODULE_LIB_PATH "share/avrCppLib") #ścieżka (względem BASE_DIR) do instalowania bibliotek
   set (MODULE_CPU "")                     #procesor
   set (MODULE_FCPU "1000000")             #f procesora
   set (MODULE_CLKSRC "internal")          #typ zegara: internal, external, oscilator
@@ -80,19 +80,30 @@ macro (avr_module)
   set(LDFLAGS ${LDFLAGS} -Wl,-O1 -fwhole-program)
 
   #dodatkowe biblioteki
-  set(LIB_SOURCES "")
+  set(SOURCES_EXTRA_DEPENDENCIES "")
   foreach(LIB ${MODULE_EXT_LIBRARIES})
-    include(${BASE_DIR}/lib/lib${LIB}.info)
-    set(LIB_SOURCES ${LIB_SOURCES} ${lib${LIB}})
+    
+    #get list of cpp files
+    execute_process(
+        COMMAND cat ${AVR_CPP_LIB_DATA}/lib${LIB}.lst
+        OUTPUT_VARIABLE LIBRARY_FILES
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+  
+    #add library's sources to sourcefiles
+    foreach(lib_file ${LIBRARY_FILES})
+        set(MODULE_SOURCES ${MODULE_SOURCES} ${AVR_CPP_LIB_DATA}/src/${lib_file})
+    endforeach(lib_file ${LIBRARY_FILES})
+    
   endforeach(LIB ${MODULE_EXT_LIBRARIES})
   
-  if (NOT EXISTS libs)
-    message ("Creating directory libs")
-    execute_process(COMMAND mkdir -p libs)
-  endif (NOT EXISTS libs)
+  #if (NOT EXISTS libs)
+  #  message ("Creating directory libs")
+  #  execute_process(COMMAND mkdir -p libs)
+  #endif (NOT EXISTS libs)
 
   #DEF_FLAGS są używane do generowania zależności, zawierają minimalny zestaw flag
-  set (DEF_FLAGS "-DF_CPU=${MODULE_FCPU}UL" ${COMMON_FLAGS} -I${BASE_DIR}/include)
+  set (DEF_FLAGS "-DF_CPU=${MODULE_FCPU}UL" ${COMMON_FLAGS} -I${AVR_CPP_LIB_INCLUDE})
 
   #właściwe flagi używane podczas kompilacji
   set(CFLAGS ${DEF_FLAGS})           #flagi podstawowe
@@ -116,7 +127,7 @@ macro (avr_module)
     
     set(CFLAGS ${CFLAGS} -ffunction-sections -fdata-sections )   #this works only with -Wl,--gc-sections and (probably) -fuse-cxa-atexit
     set(CFLAGS ${CFLAGS} -fno-tree-scev-cprop)   #czasem pomaga
-    set(CFLAGS ${CFLAGS} -fno-split-wide-types) #czasem pomaga, czasem przeszkadza
+    #set(CFLAGS ${CFLAGS} -fno-split-wide-types)  #czasem pomaga, czasem przeszkadza
     set(CFLAGS ${CFLAGS} -fmerge-all-constants)
     set(CFLAGS ${CFLAGS} -finline-small-functions)
 
@@ -125,76 +136,68 @@ macro (avr_module)
   endif (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
 
   #dołącz ostrzeżenia i flagi ogólne
-  set(CFLAGS ${CFLAGS} -W -Wall -Wextra -Winit-self -Wformat=2 -Wshadow -Wlogical-op) #-Winline
-  set(CFLAGS ${CFLAGS} -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums )
+  set(CFLAGS ${CFLAGS} -W -Wall -Wextra -Winit-self -Wformat=2 -Wshadow -Wlogical-op -Winline)
+  set(CFLAGS ${CFLAGS} -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums)
   set(CFLAGS ${CFLAGS} -ffreestanding -save-temps)
 
   #flagi dla c++
-  set(CPPFLAGS ${CFLAGS} -pedantic -fno-exceptions -fno-rtti) # -Weffc++)  
+  set(CPPFLAGS ${CFLAGS} -pedantic -fno-exceptions -fno-rtti -Weffc++)  
   set(CPPFLAGS ${CPPFLAGS} -fno-threadsafe-statics)
 
   #standardy i przerzucenie CFLAGS bądź CPPFLAGS do FLAGS
   if ("${MODULE_TYPE}" STREQUAL "C")
     set(FLAGS ${CFLAGS} -std=gnu99)
   else ("${MODULE_TYPE}")
-    set(FLAGS ${CPPFLAGS} -std=c++0x)
+    set(FLAGS ${CPPFLAGS} -std=c++11)
   endif ("${MODULE_TYPE}" STREQUAL "C")
 
-  #dodaj reguły dla plików bibliotecznych
-  foreach(LIB ${LIB_SOURCES})
-    get_filename_component(FILENAME ${LIB} NAME)  #wyodrębnij nazwę pliku
-    add_custom_command(
-      OUTPUT libs/${FILENAME}.o
-      COMMAND ${COMPILER}
-      ARGS ${FLAGS} -c -o libs/${FILENAME}.o ${LIB}
-    )
-    set(MODULE_OBJECTS libs/${FILENAME}.o ${MODULE_OBJECTS})
-  endforeach(LIB ${LIB_SOURCES})
-  
   #argumenty przemielone, tworzymy targety dla kazdego pliku źródłowego
-  foreach(SRC ${MODULE_SOURCES})
-    set(OBJECT ${SRC}.o)
-    set(MODULE_OBJECTS ${OBJECT} ${MODULE_OBJECTS})
-    set(SOURCE_FILE "")
-    
-    if (IS_ABSOLUTE ${SRC})
-      set(SOURCE_FILE ${SRC})
-    else(IS_ABSOLUTE)
-      set(SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${SRC})
-    endif (IS_ABSOLUTE ${SRC})
+  if ("${MODULE_MODE}" STREQUAL "program")
+    foreach(SRC ${MODULE_SOURCES})
+        set(OBJECT ${SRC}.o)
+        set(MODULE_OBJECTS ${OBJECT} ${MODULE_OBJECTS})
+        set(SOURCE_FILE "")
+        
+        if (IS_ABSOLUTE ${SRC})
+        set(SOURCE_FILE ${SRC})
+        else(IS_ABSOLUTE)
+        set(SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${SRC})
+        endif (IS_ABSOLUTE ${SRC})
 
-    #Cmake nie tworzy drzewa katalogow dla plików przetwarzanych manualnie. Tworzymy je ręcznie
-    get_filename_component(DIRNAME ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT} PATH)  #wyodrębnij nazwę pliku
-    
-    if (NOT EXISTS ${DIRNAME})
-      message ("Creating directory ${DIRNAME} for file ${OBJECT}")
-      execute_process(COMMAND mkdir -p ${DIRNAME})
-    endif (NOT EXISTS ${DIRNAME})
+        #Cmake nie tworzy drzewa katalogow dla plików przetwarzanych manualnie. Tworzymy je ręcznie
+        get_filename_component(DIRNAME ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT} PATH)  #wyodrębnij nazwę pliku
+        
+        #if (NOT EXISTS ${DIRNAME})
+        #  message ("Creating directory ${DIRNAME} for file ${OBJECT}")
+        #  execute_process(COMMAND mkdir -p ${DIRNAME})
+        #endif (NOT EXISTS ${DIRNAME})
 
-    #tworzenie pliku zależności (lista includów)
-    string(REGEX REPLACE "\\/" "_" DEPS ${OBJECT})  #usuń z nazwy pliku "/" i "."
-    string(REGEX REPLACE "\\." "_" DEPS ${DEPS})
+        #tworzenie pliku zależności (lista includów)
+        string(REGEX REPLACE "\\/" "_" DEPS ${OBJECT})  #usuń z nazwy pliku "/" i "."
+        string(REGEX REPLACE "\\." "_" DEPS ${DEPS})
 
-    #wygeneruj zależności
-    execute_process(
-      COMMAND ${COMPILER} ${DEF_FLAGS} -MM -MT ${DEPS} -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}
-      )
+        #wygeneruj zależności
+        execute_process(
+            COMMAND mkdir -p ${DIRNAME}
+            COMMAND ${COMPILER} ${DEF_FLAGS} -MM -MT ${DEPS} -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}
+        )
 
-    #popraw plik .d, tak żeby się go dało doinkludować
-    execute_process(
-      COMMAND sed -e "s/\\(.*\\):/set(\\1/" -e "/[^\\]$/a)" -e "s/\\\\//" -i ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d
-    )
+        #popraw plik .d, tak żeby się go dało doinkludować
+        execute_process(
+            COMMAND sed -e "s/\\(.*\\):/set(\\1/" -e "/[^\\]$/a)" -e "s/\\\\//" -i ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d
+        )
 
-    include(${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d)
+        include(${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d)
 
-    #regula dla pojedynczego pliku
-    add_custom_command(
-      OUTPUT ${OBJECT}
-      DEPENDS ${${DEPS}}  #dołącz zależności pliku
-      COMMAND ${COMPILER}
-      ARGS ${FLAGS} -c -o ${OBJECT} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}
-    )
-  endforeach(SRC) #koniec regul dla pojedynczych plików źródłowych
+        #regula dla pojedynczego pliku
+        add_custom_command(
+            OUTPUT ${OBJECT}
+            DEPENDS ${${DEPS}}  #dołącz zależności pliku
+            COMMAND ${COMPILER}
+            ARGS ${FLAGS} -c -o ${OBJECT} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}
+        )
+    endforeach(SRC) #koniec regul dla pojedynczych plików źródłowych
+  endif("${MODULE_MODE}" STREQUAL "program")
 
   #target ostateczny - różny dla programu i biblioteki
   set (TARGET_FILE "")
@@ -214,35 +217,35 @@ macro (avr_module)
   elseif ("${MODULE_MODE}" STREQUAL "library")
   
     message("Generating targets for library ${MODULE_NAME}")
-    set(TARGET_FILE lib${MODULE_NAME}.info)
+    set(TARGET_FILE lib${MODULE_NAME}.lst)
 
     if (NOT "${MODULE_SOURCES}" STREQUAL "")
       add_custom_target(${MODULE_NAME} ALL DEPENDS ${TARGET_FILE}) #${MODULE_NAME}.size ${MODULE_NAME}.lst ${MODULE_NAME}.diff)
 
-      #zapisz pliki cpp biblioteki w pliku info (uwzględniając ich koncową lokalizację)
-      set(NAKED_NAMES "")
-      foreach(SRC ${MODULE_SOURCES}) 
-        #wyodrębnij nazwę pliku źródłowego
-        get_filename_component(FILENAME ${SRC} NAME)        
-        set(NAKED_NAMES ${BASE_DIR}/${MODULE_INC_PATH}/${FILENAME} ${NAKED_NAMES})  #dopisz do listy
-      endforeach(SRC ${MODULE_SOURCES})
+      set(source_names "")
+      foreach(src_file ${MODULE_SOURCES})
+        get_filename_component(src_file_only ${src_file} NAME)
+        set(source_names ${source_names} ${src_file_only})
+      endforeach(src_file ${MODULE_SOURCES})
       
-      #stwórz plik info zawierający listę plików do skompilowania w momencie kompilacji projektu głównego
+      #stwórz archiwum plików cpp biblioteki
       add_custom_command(
         OUTPUT ${TARGET_FILE}
-        DEPENDS ${MODULE_OBJECTS}
-        COMMAND echo 'set(lib${MODULE_NAME} ${NAKED_NAMES})' > ${TARGET_FILE}
+        COMMAND echo -n ${source_names} | sed -e "s/ /\;/g" > ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_FILE} 
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       )
 
       install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_FILE} 
                DESTINATION ${BASE_DIR}/${MODULE_LIB_PATH}
                PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+                              
+      install (FILES ${MODULE_SOURCES}
+               DESTINATION ${BASE_DIR}/${MODULE_LIB_PATH}/src
+               PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+                              
     endif (NOT "${MODULE_SOURCES}" STREQUAL "")
 
     install (FILES ${MODULE_HEADERS} 
-             DESTINATION ${BASE_DIR}/${MODULE_INC_PATH}
-             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
-    install (FILES ${MODULE_SOURCES} 
              DESTINATION ${BASE_DIR}/${MODULE_INC_PATH}
              PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
              
