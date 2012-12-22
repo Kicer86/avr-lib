@@ -17,6 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//usefull links:
+//http://www.geocities.com/dinceraydin/lcd/commands.htm
+
 #include "../../ports/ports.hpp"
 #include "../../delay.hpp"
 
