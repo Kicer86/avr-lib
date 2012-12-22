@@ -195,7 +195,7 @@ macro (avr_module)
   
     message("Generating targets for program ${MODULE_NAME}")
     set(TARGET_FILE ${MODULE_NAME}.elf)
-    add_custom_target(${MODULE_NAME} ALL DEPENDS ${TARGET_FILE} ${MODULE_NAME}.size ${MODULE_NAME}.lst ${MODULE_NAME}.diff ${MODULE_NAME}.hex ${MODULE_NAME}.eep ${MODULE_NAME}.eep.bin)
+    add_custom_target(${MODULE_NAME} ALL DEPENDS ${TARGET_FILE} ${MODULE_NAME}.size ${MODULE_NAME}.lst ${MODULE_NAME}.dump ${MODULE_NAME}.diff ${MODULE_NAME}.hex ${MODULE_NAME}.eep ${MODULE_NAME}.eep.bin)
 
     add_custom_command(
       OUTPUT ${MODULE_NAME}.elf
@@ -242,6 +242,13 @@ macro (avr_module)
     COMMAND avr-objdump
     ARGS -d ${TARGET_FILE} > ${MODULE_NAME}.lst
   )
+  
+  add_custom_command(
+    OUTPUT ${MODULE_NAME}.dump
+    DEPENDS ${TARGET_FILE}
+    COMMAND avr-objdump
+    ARGS -x ${TARGET_FILE} > ${MODULE_NAME}.dump
+    )
 
   add_custom_command(
     OUTPUT ${MODULE_NAME}.size
