@@ -26,16 +26,16 @@ class Delay
         asm volatile ("nop");
     }
 
-  public:
+  public:      
     template <word delay>
-    static void ns()
+    inline static void __attribute__((always_inline, hot)) ns()
     {
       const dword ticks=static_cast<dword>(delay) * tics_per_mhz/1000;
       tick (ticks);
     }
-    
+        
     template <word delay>
-    static void us() 
+    inline static void __attribute__((always_inline, hot)) us () 
     {
       const dword ticks=static_cast<dword>(delay) * tics_per_mhz;
 
@@ -84,7 +84,7 @@ class Delay
       }
     }
     
-    inline static void ms(word delay) __attribute__((cold)); //without "cold" delay's body may not become a simple loop, which is not what we want
+    inline static void ms(word delay) __attribute__((cold, noinline)); //without "cold" delay's body may not become a simple loop, which is not what we want
 };
 
 
