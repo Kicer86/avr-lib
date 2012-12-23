@@ -96,7 +96,7 @@ macro (avr_module)
     endforeach(lib_file ${LIBRARY_FILES})
     
   endforeach(LIB ${MODULE_EXT_LIBRARIES})
-  
+    
   #if (NOT EXISTS libs)
   #  message ("Creating directory libs")
   #  execute_process(COMMAND mkdir -p libs)
@@ -154,16 +154,21 @@ macro (avr_module)
   #argumenty przemielone, tworzymy targety dla kazdego pliku źródłowego
   if ("${MODULE_MODE}" STREQUAL "program")
     foreach(SRC ${MODULE_SOURCES})
-        set(OBJECT ${SRC}.o)
-        set(MODULE_OBJECTS ${OBJECT} ${MODULE_OBJECTS})
+    
         set(SOURCE_FILE "")
         
         if (IS_ABSOLUTE ${SRC})
-        set(SOURCE_FILE ${SRC})
+            set(SOURCE_FILE ${SRC})
+            
+            get_filename_component(source_file_name ${SRC} NAME)
+            set(OBJECT avrCppLib/${source_file_name}.o)            
         else(IS_ABSOLUTE)
-        set(SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${SRC})
-        endif (IS_ABSOLUTE ${SRC})
-
+            set(SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${SRC})
+            set(OBJECT ${SRC}.o)
+        endif (IS_ABSOLUTE ${SRC})    
+    
+        set(MODULE_OBJECTS ${OBJECT} ${MODULE_OBJECTS})
+        
         #Cmake nie tworzy drzewa katalogow dla plików przetwarzanych manualnie. Tworzymy je ręcznie
         get_filename_component(DIRNAME ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT} PATH)  #wyodrębnij nazwę pliku
         
@@ -177,6 +182,7 @@ macro (avr_module)
         string(REGEX REPLACE "\\." "_" DEPS ${DEPS})
 
         #wygeneruj zależności
+        message("dupa -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}")
         execute_process(
             COMMAND mkdir -p ${DIRNAME}
             COMMAND ${COMPILER} ${DEF_FLAGS} -MM -MT ${DEPS} -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}
@@ -194,8 +200,9 @@ macro (avr_module)
             OUTPUT ${OBJECT}
             DEPENDS ${${DEPS}}  #dołącz zależności pliku
             COMMAND ${COMPILER}
-            ARGS ${FLAGS} -c -o ${OBJECT} ${CMAKE_CURRENT_SOURCE_DIR}/${SRC}
+            ARGS ${FLAGS} -c -o ${OBJECT} ${SOURCE_FILE}
         )
+                
     endforeach(SRC) #koniec regul dla pojedynczych plików źródłowych
   endif("${MODULE_MODE}" STREQUAL "program")
 
@@ -206,7 +213,7 @@ macro (avr_module)
     message("Generating targets for program ${MODULE_NAME}")
     set(TARGET_FILE ${MODULE_NAME}.elf)
     add_custom_target(${MODULE_NAME} ALL DEPENDS ${TARGET_FILE} ${MODULE_NAME}.size ${MODULE_NAME}.lst ${MODULE_NAME}.dump ${MODULE_NAME}.diff ${MODULE_NAME}.hex ${MODULE_NAME}.eep ${MODULE_NAME}.eep.bin)
-
+    
     add_custom_command(
       OUTPUT ${MODULE_NAME}.elf
       DEPENDS ${MODULE_OBJECTS}
