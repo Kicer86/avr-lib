@@ -10,6 +10,8 @@ class PCInt
         PCInt() = delete;
         
         static void setup(const Ports::PortT &, byte pin, bool set = true);
+        static void disable();
+        static void enable();
 };
 
 #endif

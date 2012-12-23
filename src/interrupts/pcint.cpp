@@ -15,7 +15,6 @@ void PCInt::setup(const Ports::PortT& port, byte pin, bool set)
             if (port == Ports::PortB)
                 Register::pcmsk[pin] = set;
                 
-            Register::gimsk[5] = Register::pcmsk != 0;
             break;
         }
 
@@ -23,3 +22,15 @@ void PCInt::setup(const Ports::PortT& port, byte pin, bool set)
             break;
     }
 }
+
+
+void PCInt::disable()
+{
+    Register::gimsk[5] = false;
+}
+
+void PCInt::enable()
+{
+    Register::gimsk[5] = true;
+}
+
