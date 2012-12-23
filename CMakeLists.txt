@@ -82,7 +82,8 @@ avr_module(protocols
 )
 
 avr_module(interrupts
-    MODULE_HEADERS src/interrupts/pcint.hpp
+    MODULE_SOURCES src/interrupts/interrupts.cpp src/interrupts/pcint.cpp
+    MODULE_HEADERS src/interrupts/interrupts.hpp src/interrupts/pcint.hpp
     MODULE_MODE library
     MODULE_INC_PATH include/interrupts/
 )
