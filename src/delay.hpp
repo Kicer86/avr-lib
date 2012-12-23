@@ -1,3 +1,4 @@
+
 #ifndef DELAY_HPP
 #define DELAY_HPP
 
@@ -82,9 +83,8 @@ class Delay
         tick(r);
       }
     }
-
     
-    static void ms(word delay) __attribute__((cold)); //without "cold" delay's body may not become a simple loop, which is not what we want
+    inline static void ms(word delay) __attribute__((cold)); //without "cold" delay's body may not become a simple loop, which is not what we want
 };
 
 
