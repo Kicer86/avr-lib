@@ -74,6 +74,12 @@ avr_module(rfm12
     MODULE_INC_PATH include/hardware/wireless
 )
 
+avr_module(ds18b20
+    MODULE_HEADERS src/hardware/thermometers/ds18b20.hpp
+    MODULE_MODE library
+    MODULE_INC_PATH include/hardware/thermometers
+)
+
 avr_module(protocols
     #MODULE_SOURCES src/protocols/one_wire.cpp
     MODULE_HEADERS src/protocols/one_wire.hpp
