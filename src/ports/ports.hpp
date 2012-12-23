@@ -13,7 +13,6 @@
 
 //If you don'w want to use those options, declare all Ports as local (stack) variables or 
 //as global objects (but with static keyword).
-//This will make them incompatible with all Port related templates from this library
 
 namespace
 {
@@ -22,6 +21,23 @@ namespace
         return reinterpret_cast<Ports::PortAddr>(t);
     }
 }
+
+
+class Port;
+
+class Pin
+{
+        friend class Port;
+        
+        const Port &m_port;
+        const byte m_pos;
+        
+        constexpr Pin(const Port &port, byte pos): m_port(port), m_pos(pos) {}
+        
+    public:
+        inline const Pin& operator=(bool set) const;
+};
+
 
 class Port
 {
@@ -50,6 +66,11 @@ class Port
             write(v);
             return *this;
         }
+        
+        Pin operator[](byte pos) const
+        {
+            return Pin(*this, pos);
+        }
 
         inline operator byte() const
         {
@@ -75,6 +96,17 @@ class Port
         
         Port& operator= ( const Port& ) = delete;
 };
+
+
+const Pin& Pin::operator=(bool set) const
+{
+    if (set)
+        m_port |= 1 << m_pos;
+    else
+        m_port &= ~(1 << m_pos);
+    
+    return *this;
+}
 
 
 class IOPort: public Port
