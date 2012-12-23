@@ -1,7 +1,7 @@
  
-#include <one_wire.hpp>
-#include <../ports/ports.hpp>
-#include <../interrupts/pcint.hpp>
+#include <protocols/one_wire.hpp>
+#include <ports/ports.hpp>
+#include <interrupts/pcint.hpp>
 
 namespace
 {
