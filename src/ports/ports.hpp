@@ -35,7 +35,8 @@ class Pin
         constexpr Pin(const Port &port, byte pos): m_port(port), m_pos(pos) {}
         
     public:
-        inline const Pin& operator=(bool value) const __attribute__((always_inline));
+        inline operator bool() const __attribute__((always_inline));                    //read value
+        inline const Pin& operator=(bool value) const __attribute__((always_inline));   //write value
 };
 
 
@@ -67,7 +68,7 @@ class Port
             return *this;
         }
         
-        Pin operator[](byte pos) const
+        const Pin operator[](byte pos) const
         {
             return Pin(*this, pos);
         }
@@ -96,6 +97,12 @@ class Port
         
         Port& operator= ( const Port& ) = delete;
 };
+
+
+Pin::operator bool() const
+{
+    return (m_port & (1 << m_pos)) > 0;
+}
 
 
 const Pin& Pin::operator=(bool value) const

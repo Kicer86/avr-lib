@@ -36,9 +36,12 @@ namespace OneWire
                 //wait for response
                 releaseBus();
                 
-                Delay::us<60>();           //maximum time for setting up
+                Delay::us<60>();           //maximum time for setting up        
                 
+                const bool state = readBusState();
                 
+                if (state == false)
+                    m_state = Ready;                
             }
                     
         private:        
@@ -77,11 +80,6 @@ namespace OneWire
                 
                 if (addRecoveryTime)
                     Delay::us<1>();
-                
-                const bool state = readBusState();
-                
-                if (state == false)
-                    m_state = Ready;
             }
             
             template<bool addRecoveryTime>
