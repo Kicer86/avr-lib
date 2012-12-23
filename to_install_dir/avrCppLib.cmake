@@ -117,7 +117,7 @@ macro (avr_module)
     endif(MODULE_BUILD_TYPE MATCHES "Speed|speed")
 
     if (MODULE_DEBUG STREQUAL "true")
-      set(CFLAGS ${CFLAGS} -g -gdwarf-2) 
+      set(CFLAGS ${CFLAGS} -g3 -gdwarf-2) 
     endif (MODULE_DEBUG STREQUAL "true")
     
     set(CFLAGS ${CFLAGS} -flto)
@@ -137,7 +137,7 @@ macro (avr_module)
 
   #dołącz ostrzeżenia i flagi ogólne
   set(CFLAGS ${CFLAGS} -W -Wall -Wextra -Winit-self -Wformat=2 -Wshadow -Wlogical-op -Winline)
-  set(CFLAGS ${CFLAGS} -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums)
+  set(CFLAGS ${CFLAGS} -funsigned-char -funsigned-bitfields -fshort-enums)
   set(CFLAGS ${CFLAGS} -ffreestanding -save-temps)
 
   #flagi dla c++
@@ -182,7 +182,6 @@ macro (avr_module)
         string(REGEX REPLACE "\\." "_" DEPS ${DEPS})
 
         #wygeneruj zależności
-        message("dupa -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}")
         execute_process(
             COMMAND mkdir -p ${DIRNAME}
             COMMAND ${COMPILER} ${DEF_FLAGS} -MM -MT ${DEPS} -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}
