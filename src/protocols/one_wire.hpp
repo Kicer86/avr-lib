@@ -41,41 +41,71 @@ namespace OneWire
                 const bool state = readBusState();
                 
                 if (state == false)
-                    m_state = Ready;                
+                    m_state = Ready; 
+                
+                //wait for bus to be released
+                while (readBusState() == false);
             }
-                    
+            
+            void write(byte value) const
+            {
+                for(byte i = 0; i < 8; i++)
+                {
+                    write<true>( (value & 1 ) > 0 );
+                    value >>= 1;
+                }
+            }
+            
+            byte read() const
+            {
+                byte result = 0;
+                for(byte i = 0; i < 8; i++)
+                {
+                    result >>= 1;
+                    result |= read<true>() * 128;
+                }
+                   
+                return result;
+            }
+            
+            void read(byte count, byte *buffer) const
+            {
+                for(byte i = 0; i < count; i++)
+                    buffer[i] = read();
+            }            
+            
         private:        
             enum State
             {
                 Ready,
                 Reset
             } m_state;
-            
-            inline void pullBus()
+                        
+            inline void pullBus() const __attribute__((always_inline))
             {
                 IOPort bus(port);
                 bus.dir[pin] = true;       //switch to output
             }
             
-            inline void releaseBus()
+            inline void releaseBus() const __attribute__((always_inline))
             {
                 IOPort bus(port);
                 bus.dir[pin] = false;      //switch to input
             }
             
             template<bool addRecoveryTime>
-            inline void write(bool value)
+            inline void write(bool value) const
             {
                 pullBus();
                                     
                 if (value)
-                    Delay::us<60>();
-                else
                     Delay::us<5>();      // 1 < x < 15
+                else
+                    Delay::us<60>();
                 
                 releaseBus();            //release bus
                 
-                if (value == false )
+                if (value)
                     Delay::us<55>();     //fill cycle (to 60µs)
                 
                 if (addRecoveryTime)
@@ -83,7 +113,7 @@ namespace OneWire
             }
             
             template<bool addRecoveryTime>
-            inline bool read()
+            inline bool read() const
             {
                 pullBus();                
                 Delay::us<5>();         // 1 < x < 15
@@ -100,7 +130,7 @@ namespace OneWire
                 return state;
             }
             
-            inline bool readBusState()
+            inline bool readBusState() const __attribute__((always_inline))
             {
                 IOPort bus(port);
                 return bus[pin];
