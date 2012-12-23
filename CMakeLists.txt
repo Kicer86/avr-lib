@@ -75,14 +75,14 @@ avr_module(rfm12
 )
 
 avr_module(protocols
-    MODULE_SOURCES src/protocols/one_wire.cpp
+    #MODULE_SOURCES src/protocols/one_wire.cpp
     MODULE_HEADERS src/protocols/one_wire.hpp
     MODULE_MODE library
     MODULE_INC_PATH include/protocols/
 )
 
 avr_module(interrupts
-    MODULE_SOURCES src/interrupts/interrupts.cpp src/interrupts/pcint.cpp
+    MODULE_SOURCES src/interrupts/pcint.cpp
     MODULE_HEADERS src/interrupts/interrupts.hpp src/interrupts/pcint.hpp
     MODULE_MODE library
     MODULE_INC_PATH include/interrupts/
