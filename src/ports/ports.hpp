@@ -28,6 +28,7 @@ class Port;
 class Pin
 {
         friend class Port;
+        friend class IOPort;
         
         const Port &m_port;
         const byte m_pos;
@@ -138,6 +139,12 @@ class IOPort: public Port
         {
             write(v);
             return *this;
+        }        
+                    
+        inline const Pin operator[](byte pos) const
+        {
+            Pin result(pin, pos);
+            return result;
         }
 
         inline Ports::PortAddr pinAddr() const
