@@ -53,6 +53,31 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
       
     endif (MODULE_CLKSRC STREQUAL "internal")
     
+  elseif(MODULE_CPU STREQUAL "attiny2313")
+  
+    set(E_FUSE 0xFF)
+    set(H_FUSE 0xDF)
+    
+    if (MODULE_CLKSRC STREQUAL "internal")
+    
+      if (MODULE_FCPU STREQUAL "500000")
+        set(L_FUSE 0x62)
+      elseif (MODULE_FCPU STREQUAL "1000000")
+        set(L_FUSE 0x64)
+      elseif (MODULE_FCPU STREQUAL "4000000")
+        set(L_FUSE 0xE2)
+      elseif (MODULE_FCPU STREQUAL "8000000")
+        set(L_FUSE 0xE4)
+      else (MODULE_FCPU)
+        message(FATAL_ERROR "Invalid CPU frequency")
+      endif (MODULE_FCPU)
+      
+    elseif (MODULE_CLKSRC STREQUAL "oscilator")
+
+        message(FATAL_ERROR "unsupported yet")
+        
+    endif (MODULE_CLKSRC STREQUAL "internal")
+    
   else(MODULE_CPU)
     message(WARNING "${MODULE_CPU} (module ${MODULE_NAME}) is not supported by cpus/CMakeLists.txt. ${MODULE_NAME}_setfuses will not be generated." )  
   endif (MODULE_CPU STREQUAL "atmega8")
@@ -71,7 +96,7 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
   endif(E_FUSE)
 
   if (FUSE_FLAGS)
-    #message("Generating ${MODULE_NAME}_setfuses with: ${FUSE_FLAGS}")
+    message("Generating ${MODULE_NAME}_setfuses with: ${FUSE_FLAGS}")
     add_custom_target(${MODULE_NAME}_setfuses
       sudo avrdude ${AVRDUDE_FLAGS} ${FUSE_FLAGS}
     )
