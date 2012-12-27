@@ -106,7 +106,7 @@ namespace OneWire
                 releaseBus();            //release bus
                 
                 if (value)
-                    Delay::us<55>();     //fill cycle (to 60µs)
+                    Delay::us<55>();     //fill cycle (up to 60µs)
                 
                 if (addRecoveryTime)
                     Delay::us<1>();
@@ -122,7 +122,7 @@ namespace OneWire
                 
                 const bool state = readBusState();
                 
-                Delay::us<45>();        // fill cycle (to 60us)
+                Delay::us<45>();        // fill cycle (up to 60us)
                 
                 if (addRecoveryTime)
                     Delay::us<1>();
