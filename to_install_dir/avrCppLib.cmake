@@ -22,8 +22,8 @@ macro (avr_module)
   set (MODULE_C_COMPILER "avr-gcc")       #kompilator C
   set (MODULE_CPP_COMPILER "avr-g++")     #kompilator C++
   set (MODULE_FLAGS "")                   #dodatkowe flagi kompilacji
-  set (MODULE_BUILD_TYPE "Size")          #typ wydania (Speed/Size)
-  set (MODULE_DEBUG "")                   #debug?
+  set (MODULE_BUILD_TYPE "Size")          #typ buildu (Speed/Size/Debug)
+  set (MODULE_DEBUG "")                   #add debug symbols?
 
   #zmienne lokalne
   set (MODULE_OBJECTS "")
@@ -66,7 +66,7 @@ macro (avr_module)
     set (COMPILER ${MODULE_C_COMPILER})
   endif ("${MODULE_TYPE}" STREQUAL "CPP")
 
-	#http://www.stmental.net/~dfoster/avr-libc-user-manual-1.6.5/using_tools.html
+  #http://www.stmental.net/~dfoster/avr-libc-user-manual-1.6.5/using_tools.html
   #http://www.nongnu.org/avr-libc/user-manual/using_tools.html
   set(MMCU "-mmcu=avr6")  #domyslna architektura dla bibliotek (maksymalna, aby dowolny kod się skompilował)
   if (NOT "${MODULE_CPU}" STREQUAL "")
@@ -75,9 +75,12 @@ macro (avr_module)
 
   #podstawowe flagi
   set(COMMON_FLAGS ${MMCU} ${MODULE_FLAGS})
-  set(LDFLAGS ${COMMON_FLAGS})
-  set(LDFLAGS ${LDFLAGS} -Wl,--relax -Wl,-static -Wl,--gc-sections  -Wl,--warn-common)
-  set(LDFLAGS ${LDFLAGS} -Wl,-O1 -fwhole-program)
+  set(LDFLAGS ${COMMON_FLAGS} -Wl,--warn-common)
+  
+  if (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
+    set(LDFLAGS ${LDFLAGS} -Wl,--relax -Wl,-static -Wl,--gc-sections)
+    set(LDFLAGS ${LDFLAGS} -Wl,-O1 -fwhole-program)
+  endif(MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
 
   #dodatkowe biblioteki
   set(SOURCES_EXTRA_DEPENDENCIES "")
@@ -132,7 +135,7 @@ macro (avr_module)
     set(CFLAGS ${CFLAGS} -finline-small-functions)
 
   else (MODULE_BUILD_TYPE)  #debug
-    set(CFLAGS ${CFLAGS} -O0 -g -gdwarf-2)
+    set(CFLAGS ${CFLAGS} -Os -g3 -gdwarf-2)
   endif (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
 
   #dołącz ostrzeżenia i flagi ogólne
