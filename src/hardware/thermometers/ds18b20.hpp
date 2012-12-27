@@ -10,11 +10,12 @@
 #include "ports/ports.hpp"
 #include "protocols/one_wire.hpp"
 
-template<Ports::PortT port, byte pin>
+template<Ports::PortT port, byte pin, bool parasiteMode = true>
 class DS18B20
 {
         const byte readRomCmd = 0x33;
         const byte convertCmd = 0x44;
+        const byte skipRomCmd = 0xCC;
         const byte readScratchpadCmd = 0xBE;
     
     public:
@@ -30,31 +31,30 @@ class DS18B20
             byte m_crc;
         };
         
-        //detect sensor - current implementation supports only one slave        
-        void init()
-        {            
+        /*
+        //detect sensors
+        const Data& detectSensors()
+        {
             byte *buffer = reinterpret_cast<byte *>(&m_data);
             
-            m_oneWire.reset();
             m_oneWire.write(readRomCmd);
-            m_oneWire.read(sizeof(Data), buffer); 
-        }
-        
-        //get info about detected sensor
-        const Data& getInfo() const
-        {
+            m_oneWire.read(sizeof(Data), buffer);
             return m_data;
         }
+        */
         
-        word readRawTemp() const
+        word readRawTemp()
         {
+            init();
+            
             m_oneWire.write(convertCmd);
+                       
+            if (parasiteMode)
+                Delay::ms(750);           //TODO: configureable
+            else
+                while(m_oneWire.read() == false);
             
-            //TODO: defferent reactions in parasite/normal powering modes
-            
-            //normal powering:            
-            while(m_oneWire.read() == false);
-            //
+            init();
             
             struct __attribute__((packed)) Scratchpad
             {
@@ -71,16 +71,23 @@ class DS18B20
             
             static_assert(sizeof(Scratchpad) == 9, "invalid size of scratchpad structure");
             byte *buffer = reinterpret_cast<byte *>(&scratchpad);
-            
+                        
             m_oneWire.write(readScratchpadCmd);   
             m_oneWire.read(sizeof(Scratchpad), buffer);
             
             return scratchpad.t_lsb + 256 * scratchpad.t_msb;
         }
         
-    private:
+    private:       
         OneWire::InterruptBased<port, pin> m_oneWire;        
         Data m_data;
+        
+        //init transaction - current implementation supports only one slave        
+        void init()
+        {
+            m_oneWire.reset();
+            m_oneWire.write(skipRomCmd);
+        }
 };
 
 #endif
