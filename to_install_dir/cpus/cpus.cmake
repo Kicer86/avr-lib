@@ -70,7 +70,7 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
         set(L_FUSE 0xE4)
       else (MODULE_FCPU)
         message(FATAL_ERROR "Invalid CPU frequency")
-      endif (MODULE_FCPU)
+      endif (MODULE_FCPU STREQUAL "500000")
       
     elseif (MODULE_CLKSRC STREQUAL "oscilator")
 
