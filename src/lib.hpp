@@ -4,7 +4,10 @@
 
 //gcc 4.5.0 wymagany
 
-int main() __attribute__((noreturn));
+//optimisations:
+//http://www.tty1.net/blog/2008-04-29-avr-gcc-optimisations_en.html
+
+void main() __attribute__((noreturn, OS_main));
 extern "C" void atexit( void ) {}
 extern "C" void __cxa_pure_virtual() { for(;;) {} }
 extern "C" void __cxa_atexit() {}
