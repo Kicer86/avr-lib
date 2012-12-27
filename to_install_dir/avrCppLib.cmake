@@ -187,7 +187,7 @@ macro (avr_module)
         #wygeneruj zależności
         execute_process(
             COMMAND mkdir -p ${DIRNAME}
-            COMMAND ${COMPILER} ${DEF_FLAGS} -MM -MT ${DEPS} -MF ${CMAKE_CURRENT_BINARY_DIR}/${OBJECT}.d -c ${SOURCE_FILE}
+            COMMAND ${COMPILER} ${DEF_FLAGS} -MM -MT ${DEPS} -MF ${OBJECT}.d -c ${SOURCE_FILE}
         )
 
         #popraw plik .d, tak żeby się go dało doinkludować
