@@ -2,12 +2,27 @@
 #ifndef LIB_HPP
 #define LIB_HPP
 
+#include <lib.h>
+
+#if defined __AVR_ATmega8__
+
+#define FLASH_SIZE  8192
+#define EEPROM_SIZE 512
+#define SRAM_SIZE   1024
+
+#elif __AVR_ATtin2313__
+
+#define FLASH_SIZE  2048
+#define EEPROM_SIZE 128
+#define SRAM_SIZE   128
+
+#endif
+
 //gcc 4.5.0 wymagany
 
 //optimisations:
 //http://www.tty1.net/blog/2008-04-29-avr-gcc-optimisations_en.html
 
-void main() __attribute__((noreturn, OS_main));
 extern "C" void atexit( void ) {}
 extern "C" void __cxa_pure_virtual() { for(;;) {} }
 extern "C" void __cxa_atexit() {}
@@ -24,14 +39,5 @@ void* operator new(unsigned int size)
     
     return ret;
 }
-
-
-#if defined __AVR_ATmega8__
-
-#define FLASH_SIZE  8192
-#define EEPROM_SIZE 512
-#define SRAM_SIZE   1024
-
-#endif
 
 #endif //LIB_HPP
