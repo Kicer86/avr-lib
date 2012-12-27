@@ -19,7 +19,7 @@ class DS18B20
         const byte readScratchpadCmd = 0xBE;
     
     public:
-        DS18B20() 
+        DS18B20(): m_oneWire(), m_data()
         {
             static_assert(sizeof(Data) == 8, "Size of Data != 8");            
         }
@@ -43,7 +43,8 @@ class DS18B20
         }
         */
         
-        word readRawTemp()
+        //returned value which consists of 12bit. (LSB is 2^-4. up to 2^6. rest of bits are "sign")
+        int readRawTemp()
         {
             init();
             
@@ -59,7 +60,7 @@ class DS18B20
             struct __attribute__((packed)) Scratchpad
             {
                 byte t_lsb;
-                byte t_msb;
+                char t_msb;
                 byte th;
                 byte tl;
                 byte config;
