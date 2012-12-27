@@ -140,7 +140,7 @@ macro (avr_module)
 
   #dołącz ostrzeżenia i flagi ogólne
   set(CFLAGS ${CFLAGS} -W -Wall -Wextra -Winit-self -Wformat=2 -Wshadow -Wlogical-op -Winline)
-  set(CFLAGS ${CFLAGS} -funsigned-char -funsigned-bitfields -fshort-enums)
+  set(CFLAGS ${CFLAGS} -funsigned-bitfields -fshort-enums)
   set(CFLAGS ${CFLAGS} -ffreestanding -save-temps)
 
   #flagi dla c++
