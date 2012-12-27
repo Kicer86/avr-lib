@@ -31,7 +31,7 @@ namespace OneWire
                 pullBus();
                 
                 //wait 480-960µs            
-                Delay::us<500>();
+                Delay::us<490>();
                 
                 //wait for response
                 releaseBus();
@@ -43,8 +43,8 @@ namespace OneWire
                 if (state == false)
                     m_state = Ready; 
                 
-                //wait for bus to be released
-                while (readBusState() == false);
+                //wait up to 480µs
+                Delay::us<480-60>();             
             }
             
             void write(byte value) const
