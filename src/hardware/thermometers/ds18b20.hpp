@@ -74,7 +74,8 @@ class DS18B20
             byte *buffer = reinterpret_cast<byte *>(&scratchpad);
                         
             m_oneWire.write(readScratchpadCmd);   
-            m_oneWire.read(sizeof(Scratchpad), buffer);
+            m_oneWire.read(2, buffer);
+            m_oneWire.emptyRead(7);          //don't care about next 7 bytes
             
             return scratchpad.t_lsb + 256 * scratchpad.t_msb;
         }
