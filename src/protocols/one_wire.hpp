@@ -67,12 +67,24 @@ namespace OneWire
                    
                 return result;
             }
-            
+           
             void read(byte count, byte *buffer) const
             {
                 for(byte i = 0; i < count; i++)
                     buffer[i] = read();
-            }            
+            }
+            
+            void emptyRead() const               //read but don't care about value
+            {
+                for(byte i = 0; i < 8; i++)
+                    read<true>();
+            }
+            
+            void emptyRead(byte count) const    //read but don't care about value
+            {
+                for(byte i = 0; i < count; i++)
+                    emptyRead();
+            }
             
         private:        
             enum State
