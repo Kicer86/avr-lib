@@ -21,7 +21,7 @@ namespace OneWire
             {
                 releaseBus();
             }
-                    
+            
             void reset()
             {                
                 IOPort bus(port);
@@ -86,6 +86,21 @@ namespace OneWire
                     emptyRead();
             }
             
+            template<int us>
+            void powerSlaves() const
+            {
+                strongPullUp();                
+                Delay::us<us>();
+                releaseStrongPullUp();                
+            }
+            
+            void powerSlaves(word ms) const __attribute__((noinline))
+            {
+                strongPullUp();                
+                Delay::ms(ms);
+                releaseStrongPullUp();                
+            }
+            
         private:        
             enum State
             {
@@ -93,20 +108,35 @@ namespace OneWire
                 Reset
             } m_state;
                         
-            inline void pullBus() const __attribute__((always_inline))
+            void pullBus() const           //send 0 to bus
             {
                 IOPort bus(port);
                 bus.dir[pin] = true;       //switch to output
             }
             
-            inline void releaseBus() const __attribute__((always_inline))
+            void strongPullUp() const      //set bus to 1 (power slaves)
+            {
+                IOPort bus(port);
+                bus[pin] = true;           //1 to output
+                bus.dir[pin] = true;       //switch to output
+            }
+            
+            void releaseBus() const        //release bus
             {
                 IOPort bus(port);
                 bus.dir[pin] = false;      //switch to input
             }
             
+            void releaseStrongPullUp() const
+            {
+                releaseBus();
+                
+                IOPort bus(port);
+                bus[pin] = true;           //0 to output (no internal pullups)
+            }
+            
             template<bool addRecoveryTime>
-            inline void write(bool value) const
+            void write(bool value) const
             {
                 pullBus();
                                     
@@ -125,7 +155,7 @@ namespace OneWire
             }
             
             template<bool addRecoveryTime>
-            inline bool read() const
+            bool read() const
             {
                 pullBus();                
                 Delay::us<5>();         // 1 < x < 15
@@ -142,7 +172,7 @@ namespace OneWire
                 return state;
             }
             
-            inline bool readBusState() const __attribute__((always_inline))
+            bool readBusState() const
             {
                 IOPort bus(port);
                 return bus[pin];
