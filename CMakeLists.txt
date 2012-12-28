@@ -109,3 +109,16 @@ configure_file(avr_cpp_lib.cmake.in "${PROJECT_BINARY_DIR}/avrCppLibConfig.cmake
 
 install(FILES "${PROJECT_BINARY_DIR}/avrCppLibConfig.cmake" DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/avrCppLib/)
 
+
+#tests
+include_directories(./src)
+add_executable(tests src/tests.cpp)
+target_link_libraries(tests CppUTest)
+set_target_properties(tests PROPERTIES COMPILE_FLAGS "-std=c++11")
+
+get_target_property(exec tests LOCATION)
+
+add_custom_target(runTests 
+                  COMMAND ${exec}
+                  DEPENDS tests)
+
