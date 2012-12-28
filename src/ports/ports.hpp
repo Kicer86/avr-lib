@@ -2,7 +2,6 @@
 #ifndef PORTS_HPP
 #define PORTS_HPP
 
-#include "../common.hpp"
 #include "ports_defs.hpp"
 
 #define SFR_OFFSET 0 //__SFR_OFFSET
@@ -24,11 +23,11 @@ namespace
 
 
 class Port;
+class IOPort;
 
 class Pin
 {
         friend class Port;
-        friend class IOPort;
         
         const Port &m_port;
         const byte m_pos;
@@ -41,8 +40,25 @@ class Pin
 };
 
 
+class IOPin
+{
+        friend class IOPort;
+        
+        const Port &m_port;
+        const Port &m_pin;
+        const byte m_pos;
+        
+        constexpr IOPin(const Port &port, const Port &pin, byte pos): m_port(port), m_pin(pin), m_pos(pos) {}
+        
+    public:
+        inline operator bool() const __attribute__((always_inline));                    //read value
+        inline const IOPin& operator=(bool value) const __attribute__((always_inline));   //write value
+};
+
+
 class Port
 {
+    friend class IOPort;
 
     protected:       
         const Ports::PortAddr addr;
@@ -61,7 +77,7 @@ class Port
         constexpr Port(Ports::PortT a): addr(convert(a))
         {}
         
-        Port(const Port&) = delete;
+        explicit Port(const Port&) = delete;
 
         inline const Port &operator=(byte v) const
         {
@@ -96,7 +112,7 @@ class Port
             return addr;
         }
         
-        Port& operator= ( const Port& ) = delete;
+        Port& operator= ( const Port& ) const = delete;
 };
 
 
@@ -117,33 +133,33 @@ const Pin& Pin::operator=(bool value) const
 }
 
 
-class IOPort: public Port
+class IOPort
 {
+    public:
+        const Port port;
+        const Port dir;
         const Port pin;
 
-    public:
-        const Port dir;
-
         constexpr IOPort(Ports::PortT a): 
-            Port(a), 
-            pin(a - 2),
-            dir(a - 1)
+            port(a), 
+            dir(a - 1),
+            pin(a - 2)
         {}
 
-        inline byte operator() () const
+        inline operator byte() const
         {
             return pin;
         }
 
         inline const IOPort &operator=(byte v) const
         {
-            write(v);
+            port.write(v);
             return *this;
         }        
-                    
-        inline const Pin operator[](byte pos) const
+
+        inline const IOPin operator[](byte pos)    //write to IOPin writes to port, read reads from pin
         {
-            Pin result(pin, pos);
+            IOPin result(port, pin, pos);
             return result;
         }
 
@@ -159,9 +175,27 @@ class IOPort: public Port
 
         inline Ports::PortAddr portAddr() const
         {
-            return address();
+            return port.address();
         }
+        
+        IOPort& operator= ( const IOPort& ) const = delete;
 };
 
+
+IOPin::operator bool() const
+{
+    return (m_pin & (1 << m_pos)) > 0;
+}
+
+
+const IOPin& IOPin::operator=(bool value) const
+{
+    if (value)
+        m_port |= 1 << m_pos;
+    else
+        m_port &= ~(1 << m_pos);
+    
+    return *this;
+}
 
 #endif //PORTS_HPP

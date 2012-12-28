@@ -2,19 +2,20 @@
 #ifndef PORTS_DEFS_HPP
 #define PORTS_DEFS_HPP
 
-#include <avr/io.h>
+#ifndef __TESTS
+    #include <avr/io.h>
+#endif
 
-//#include "ports.hpp"
-#include "../common.hpp"
+#include <datatypes.h>
 
 namespace Ports
 {
-    typedef word PortT;
+    typedef ptr_t PortT;
     typedef volatile byte* PortAddr;
     
-    constexpr word convert(PortAddr port)
+    constexpr ptr_t convert(PortAddr port)
     {
-        return reinterpret_cast<word>(port);
+        return reinterpret_cast<ptr_t>(port);
     }
         
 #ifdef PORTA
