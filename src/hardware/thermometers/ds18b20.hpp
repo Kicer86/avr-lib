@@ -51,7 +51,7 @@ class DS18B20
             m_oneWire.write(convertCmd);
                        
             if (parasiteMode)
-                Delay::ms(750);           //TODO: configureable
+                m_oneWire.powerSlaves(750);           //TODO: configureable
             else
                 while(m_oneWire.read() == false);
             
