@@ -74,6 +74,11 @@ class HD44780
 
             init();
         }
+        
+        void clear()
+        {
+            writeCommand(HD44780_CLEAR);
+        }
 
         void write_PString(const char *str)
         {
@@ -145,17 +150,17 @@ class HD44780
             IOPort dataPort(data_port);
             IOPort ctrlPort(ctrl_port);
 
-            ctrlPort |= (1 << ePos);
-            dataPort &= ~( (0xf << dataShift) & 0xff );
-            dataPort |= (nibble & 0xf) << dataShift;
-            ctrlPort &= ~(1 << ePos);
+            ctrlPort[ePos] = true;
+            dataPort.port &= ~( (0xf << dataShift) & 0xff );
+            dataPort.port |= (nibble & 0xf) << dataShift;
+            ctrlPort[ePos] = false;
         }
 
         void writeData(byte data) const
         {
             IOPort ctrlPort(ctrl_port);
 
-            ctrlPort |= (1 << rsPos);
+            ctrlPort[rsPos] = true;
             writeNibble(data >> 4);
             writeNibble(data);
 
@@ -171,7 +176,7 @@ class HD44780
         {
             IOPort ctrlPort(ctrl_port);
 
-            ctrlPort &= ~(1 << rsPos);
+            ctrlPort[rsPos] = false;
             writeNibble(cmd >> 4);
             writeNibble(cmd);
 
@@ -209,7 +214,7 @@ class HD44780
 
             writeCommand(HD44780_FUNCTION_SET | HD44780_FONT5x7 | HD44780_TWO_LINE | HD44780_4_BIT);
             writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_OFF);
-            writeCommand(HD44780_CLEAR);
+            clear();
             writeCommand(HD44780_ENTRY_MODE | HD44780_EM_SHIFT_CURSOR | HD44780_EM_INCREMENT);
             setDisplayMode();                     
         }
