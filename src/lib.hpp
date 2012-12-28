@@ -4,20 +4,6 @@
 
 #include <lib.h>
 
-#if defined __AVR_ATmega8__
-
-#define FLASH_SIZE  8192
-#define EEPROM_SIZE 512
-#define SRAM_SIZE   1024
-
-#elif __AVR_ATtin2313__
-
-#define FLASH_SIZE  2048
-#define EEPROM_SIZE 128
-#define SRAM_SIZE   128
-
-#endif
-
 //gcc 4.5.0 wymagany
 
 //optimisations:
