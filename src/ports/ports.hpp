@@ -51,7 +51,7 @@ class IOPin
         constexpr IOPin(const Port &port, const Port &pin, byte pos): m_port(port), m_pin(pin), m_pos(pos) {}
         
     public:
-        inline operator bool() const __attribute__((always_inline));                    //read value
+        inline operator bool() const __attribute__((always_inline));                      //read value
         inline const IOPin& operator=(bool value) const __attribute__((always_inline));   //write value
 };
 
@@ -85,7 +85,7 @@ class Port
             return *this;
         }
         
-        const Pin operator[](byte pos) const
+        inline const Pin operator[](byte pos) const
         {
             return Pin(*this, pos);
         }
