@@ -108,31 +108,31 @@ namespace OneWire
                 Reset
             } m_state;
                         
-            void pullBus() const           //send 0 to bus
+            inline void pullBus() const           //send 0 to bus
             {
                 IOPort bus(port);
-                bus.dir[pin] = true;       //switch to output
+                bus.dir[pin] = true;              //switch to output
             }
             
-            void strongPullUp() const      //set bus to 1 (power slaves)
+            inline void strongPullUp() const      //set bus to 1 (power slaves)
             {
                 IOPort bus(port);
-                bus[pin] = true;           //1 to output
-                bus.dir[pin] = true;       //switch to output
+                bus[pin] = true;                  //1 to output
+                bus.dir[pin] = true;              //switch to output
             }
             
-            void releaseBus() const        //release bus
+            inline void releaseBus() const        //release bus
             {
                 IOPort bus(port);
-                bus.dir[pin] = false;      //switch to input
+                bus.dir[pin] = false;             //switch to input
             }
             
-            void releaseStrongPullUp() const
+            inline void releaseStrongPullUp() const
             {
                 releaseBus();
                 
                 IOPort bus(port);
-                bus[pin] = true;           //0 to output (no internal pullups)
+                bus[pin] = true;                  //0 to output (no internal pullups)
             }
             
             template<bool addRecoveryTime>
@@ -172,7 +172,7 @@ namespace OneWire
                 return state;
             }
             
-            bool readBusState() const
+            inline bool readBusState() const
             {
                 IOPort bus(port);
                 return bus[pin];
