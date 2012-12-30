@@ -3,9 +3,7 @@
 #define PORTS_HPP
 
 #include "ports_defs.hpp"
-
-#define SFR_OFFSET 0 //__SFR_OFFSET
-
+#include "utils/macros.hpp"
 
 //Ports, to be well optimized, require -fwhole-program (if one file is being compiled)
 //or -flto (for compilation) + -fwhole-program -flto (for linking).
@@ -35,8 +33,8 @@ class Pin
         constexpr Pin(const Port &port, byte pos): m_port(port), m_pos(pos) {}
         
     public:
-        inline operator bool() const __attribute__((always_inline));                    //read value
-        inline const Pin& operator=(bool value) const __attribute__((always_inline));   //write value
+        inline operator bool() const inline_attribute;                    //read value
+        inline const Pin& operator=(bool value) const inline_attribute;   //write value
 };
 
 
@@ -51,8 +49,8 @@ class IOPin
         constexpr IOPin(const Port &port, const Port &pin, byte pos): m_port(port), m_pin(pin), m_pos(pos) {}
         
     public:
-        inline operator bool() const __attribute__((always_inline));                      //read value
-        inline const IOPin& operator=(bool value) const __attribute__((always_inline));   //write value
+        inline operator bool() const inline_attribute;                      //read value
+        inline const IOPin& operator=(bool value) const inline_attribute;   //write value
 };
 
 
@@ -63,14 +61,14 @@ class Port
     protected:       
         const Ports::PortAddr addr;
 
-        inline byte read() const
+        inline byte read() const inline_attribute
         {
-            return *( addr + SFR_OFFSET );
+            return *addr;
         }
 
-        inline void write(byte v) const
+        inline void write(byte v) const inline_attribute
         {
-            *(addr + SFR_OFFSET) = v;
+            *addr = v;
         }
 
     public:
@@ -79,35 +77,35 @@ class Port
         
         explicit Port(const Port&) = delete;
 
-        inline const Port &operator=(byte v) const
+        inline const Port &operator=(byte v) const inline_attribute
         {
             write(v);
             return *this;
         }
         
-        inline const Pin operator[](byte pos) const
+        inline const Pin operator[](byte pos) const inline_attribute
         {
             return Pin(*this, pos);
         }
 
-        inline operator byte() const
+        inline operator byte() const inline_attribute
         {
             return read();
         }
 
-        inline const Port &operator|=(byte v) const
+        inline const Port &operator|=(byte v) const inline_attribute
         {
-            *( addr + SFR_OFFSET ) |= v;
+            *addr |= v;
             return *this;
         }
 
-        inline const Port &operator&=(byte v) const
+        inline const Port &operator&=(byte v) const inline_attribute
         {
-            *( addr + SFR_OFFSET ) &= v;
+            *addr &= v;
             return *this;
         }
 
-        inline Ports::PortAddr address() const
+        inline Ports::PortAddr address() const inline_attribute
         {
             return addr;
         }
@@ -146,34 +144,34 @@ class IOPort
             pin(a - 2)
         {}
 
-        inline operator byte() const
+        inline operator byte() const inline_attribute
         {
             return pin;
         }
 
-        inline const IOPort &operator=(byte v) const
+        inline const IOPort &operator=(byte v) const inline_attribute
         {
             port.write(v);
             return *this;
         }        
 
-        inline const IOPin operator[](byte pos)    //write to IOPin writes to port, read reads from pin
+        inline const IOPin operator[](byte pos) const inline_attribute //write to IOPin writes to port, read reads from pin
         {
             IOPin result(port, pin, pos);
             return result;
         }
 
-        inline Ports::PortAddr pinAddr() const
+        inline Ports::PortAddr pinAddr() const inline_attribute
         {
             return pin.address();
         }
 
-        inline Ports::PortAddr ddrAddr() const
+        inline Ports::PortAddr ddrAddr() const inline_attribute
         {
             return dir.address();
         }
 
-        inline Ports::PortAddr portAddr() const
+        inline Ports::PortAddr portAddr() const inline_attribute
         {
             return port.address();
         }
