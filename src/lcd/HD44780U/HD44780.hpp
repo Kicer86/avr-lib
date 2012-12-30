@@ -79,6 +79,18 @@ class HD44780
         {
             writeCommand(HD44780_CLEAR);
         }
+        
+        void turnOff()
+        {
+            m_data.m_screenOn = 0;
+            setDisplayMode();
+        }        
+        
+        void turnOn()
+        {
+            m_data.m_screenOn = 1;
+            setDisplayMode();
+        }
 
         void write_PString(const char *str)
         {
