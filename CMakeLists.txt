@@ -94,7 +94,12 @@ avr_module(interrupts
     MODULE_INC_PATH include/interrupts/
 )
 
-
+avr_module(utils
+    MODULE_SOURCES src/utils/waitcondition.cpp
+    MODULE_HEADERS src/utils/waitcondition.hpp src/utils/macros.hpp
+    MODULE_MODE library
+    MODULE_INC_PATH include/utils/
+)
 
 install (DIRECTORY to_install_dir/cpus
 		 DESTINATION ${BASE_DIR}/share/avrCppLib
