@@ -10,6 +10,7 @@
 #include <ports/ports_defs.hpp>
 #include <ports/ports.hpp>
 #include <delay.hpp>
+#include <utils/macros.hpp>
 
 namespace OneWire
 {
@@ -87,14 +88,14 @@ namespace OneWire
             }
             
             template<int us>
-            void powerSlaves() const
+            void powerSlaves() const 
             {
                 strongPullUp();                
                 Delay::us<us>();
                 releaseStrongPullUp();                
             }
             
-            void powerSlaves(word ms) const __attribute__((noinline))
+            void powerSlaves(word ms) const inline_attribute
             {
                 strongPullUp();                
                 Delay::ms(ms);
@@ -108,26 +109,26 @@ namespace OneWire
                 Reset
             } m_state;
                         
-            inline void pullBus() const           //send 0 to bus
+            inline void pullBus() const inline_attribute     //send 0 to bus
             {
                 IOPort bus(port);
-                bus.dir[pin] = true;              //switch to output
+                bus.dir[pin] = true;                         //switch to output
             }
             
-            inline void strongPullUp() const      //set bus to 1 (power slaves)
+            inline void strongPullUp() const inline_attribute    //set bus to 1 (power slaves)
             {
                 IOPort bus(port);
                 bus[pin] = true;                  //1 to output
                 bus.dir[pin] = true;              //switch to output
             }
             
-            inline void releaseBus() const        //release bus
+            inline void releaseBus() const inline_attribute      //release bus
             {
                 IOPort bus(port);
                 bus.dir[pin] = false;             //switch to input
             }
             
-            inline void releaseStrongPullUp() const
+            inline void releaseStrongPullUp() const inline_attribute
             {
                 releaseBus();
                 
@@ -172,7 +173,7 @@ namespace OneWire
                 return state;
             }
             
-            inline bool readBusState() const
+            inline bool readBusState() const inline_attribute
             {
                 IOPort bus(port);
                 return bus[pin];
