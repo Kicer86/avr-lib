@@ -2,8 +2,6 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#include <avr/interrupt.h>
-
 #include "datatypes.h"
 
 // byte isPowerOf2(byte arg)
@@ -41,26 +39,5 @@ namespace common
     word fastShift16(byte v);           //funkcja zwracająca 1<<v o stałym czasie wykonania (v max ==15)
     byte byte2hex(byte v);
 }
-
-
-class Interrupts
-{
-        byte flags;
-        
-    public:
-        Interrupts(): flags(0)
-        {};
-
-        void disable()
-        {
-            flags = SREG;
-            cli();
-        }
-
-        void restore() const
-        {
-            SREG = flags;
-        }
-};
 
 #endif //COMMON_HPP
