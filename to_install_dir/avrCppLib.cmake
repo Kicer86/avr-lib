@@ -114,9 +114,10 @@ macro (avr_module)
   #dołącz flagi optymalizacyjne
   if (MODULE_BUILD_TYPE MATCHES "Speed|speed|Size|size")
     if (MODULE_BUILD_TYPE MATCHES "Speed|speed")
-      set(CFLAGS ${CFLAGS} -O3)
+        set(CFLAGS ${CFLAGS} -O3)
+        set(CFLAGS ${CFLAGS} -finline-small-functions)
     else(MODULE_BUILD_TYPE)
-      set(CFLAGS ${CFLAGS} -Os)   
+        set(CFLAGS ${CFLAGS} -Os)   
     endif(MODULE_BUILD_TYPE MATCHES "Speed|speed")
 
     if (MODULE_DEBUG STREQUAL "true")
@@ -124,15 +125,11 @@ macro (avr_module)
     endif (MODULE_DEBUG STREQUAL "true")
     
     set(CFLAGS ${CFLAGS} -flto)
-    set(CFLAGS ${CFLAGS} -frename-registers)          #niewiele zmienia ale kod chyba bardziej logicznie wygląda
-    
-    set(CFLAGS ${CFLAGS} -fuse-cxa-atexit)
-    
+    set(CFLAGS ${CFLAGS} -frename-registers)          #niewiele zmienia ale kod chyba bardziej logicznie wygląda    
+    set(CFLAGS ${CFLAGS} -fuse-cxa-atexit)    
     set(CFLAGS ${CFLAGS} -ffunction-sections -fdata-sections )   #this works only with -Wl,--gc-sections and (probably) -fuse-cxa-atexit
     set(CFLAGS ${CFLAGS} -fno-tree-scev-cprop)   #czasem pomaga
-    #set(CFLAGS ${CFLAGS} -fno-split-wide-types)  #czasem pomaga, czasem przeszkadza
     set(CFLAGS ${CFLAGS} -fmerge-all-constants)
-    set(CFLAGS ${CFLAGS} -finline-small-functions)
 
   else (MODULE_BUILD_TYPE)  #debug
     set(CFLAGS ${CFLAGS} -Os -g3 -gdwarf-2)
@@ -268,7 +265,7 @@ macro (avr_module)
     OUTPUT ${MODULE_NAME}.lst
     DEPENDS ${TARGET_FILE}
     COMMAND avr-objdump
-    ARGS -d ${TARGET_FILE} > ${MODULE_NAME}.lst
+    ARGS -d ${TARGET_FILE} -C -z > ${MODULE_NAME}.lst
   )
   
   add_custom_command(
