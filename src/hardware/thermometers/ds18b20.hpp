@@ -7,6 +7,8 @@
  * 25.12.2012 Michał Walenciak         *
  ***************************************/
 
+#include <util/crc16.h>
+
 #include "ports/ports.hpp"
 #include "protocols/one_wire.hpp"
 
@@ -19,6 +21,8 @@ class DS18B20
         const byte readScratchpadCmd = 0xBE;
     
     public:
+        static constexpr int readError = 0x6E;
+        
         DS18B20(): m_oneWire(), m_data()
         {
             static_assert(sizeof(Data) == 8, "Size of Data != 8");            
@@ -44,6 +48,7 @@ class DS18B20
         */
         
         //returned value which consists of 12bit. (LSB is 2^-4. up to 2^6. rest of bits are "sign")
+        //returns 'readError' when read was invalid
         int readRawTemp()
         {
             init();
@@ -57,7 +62,7 @@ class DS18B20
             
             init();
             
-            struct __attribute__((packed)) Scratchpad
+            struct __attribute__((packed)) Data
             {
                 byte t_lsb;
                 char t_msb;
@@ -68,16 +73,28 @@ class DS18B20
                 byte res2;
                 byte res3;
                 byte crc;
+            };
+            
+            union Scratchpad
+            {
+                Data data;                
+                byte rawData[9];
             } scratchpad;
             
-            static_assert(sizeof(Scratchpad) == 9, "invalid size of scratchpad structure");
-            byte *buffer = reinterpret_cast<byte *>(&scratchpad);
+            static_assert(sizeof(Data) == 9, "invalid size of scratchpad structure");
                         
             m_oneWire.write(readScratchpadCmd);   
-            m_oneWire.read(2, buffer);
-            m_oneWire.emptyRead(7);          //don't care about next 7 bytes
+            m_oneWire.read(9, scratchpad.rawData);
             
-            return scratchpad.t_lsb + 256 * scratchpad.t_msb;
+            //verify crc
+            byte crc = 0;
+            for (byte i = 0; i < 64/8; i++)
+                crc = _crc_ibutton_update(crc, scratchpad.rawData[i]);
+            
+            const int temp = scratchpad.data.t_lsb + 256 * scratchpad.data.t_msb;
+            const int ret = crc == scratchpad.data.crc? temp : readError;
+                            
+            return ret;
         }
         
     private:       
