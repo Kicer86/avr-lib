@@ -19,7 +19,7 @@ class DS18B20
         const byte convertCmd = 0x44;
         const byte skipRomCmd = 0xCC;
         const byte readScratchpadCmd = 0xBE;
-    
+            
     public:
         static constexpr int readError = 0x6E;
         

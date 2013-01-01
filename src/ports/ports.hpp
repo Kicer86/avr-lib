@@ -83,7 +83,7 @@ class Port
             return *this;
         }
         
-        inline const Pin operator[](byte pos) const inline_attribute
+        constexpr inline const Pin operator[](byte pos) const inline_attribute
         {
             return Pin(*this, pos);
         }
@@ -155,10 +155,9 @@ class IOPort
             return *this;
         }        
 
-        inline const IOPin operator[](byte pos) const inline_attribute //write to IOPin writes to port, read reads from pin
+        constexpr inline const IOPin operator[](byte pos) const inline_attribute //write to IOPin writes to port, read reads from pin
         {
-            IOPin result(port, pin, pos);
-            return result;
+            return IOPin(port, pin, pos);
         }
 
         inline Ports::PortAddr pinAddr() const inline_attribute
