@@ -12,7 +12,7 @@
 #include "ports/ports.hpp"
 #include "protocols/one_wire.hpp"
 
-template<Ports::PortT port, byte pin, bool parasiteMode = true>
+template<Ports::PortT port, byte pin, bool blockInterrupts = true, bool parasiteMode = true>
 class DS18B20
 {
         const byte readRomCmd = 0x33;
@@ -98,7 +98,7 @@ class DS18B20
         }
         
     private:       
-        OneWire::InterruptBased<port, pin> m_oneWire;        
+        OneWire::Basic<port, pin, blockInterrupts> m_oneWire;        
         Data m_data;
         
         //init transaction - current implementation supports only one slave        
