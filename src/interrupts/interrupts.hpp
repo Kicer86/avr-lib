@@ -12,8 +12,8 @@ namespace Register
 {
     namespace
     {
-        constexpr Ports::PortT _gimsk = reinterpret_cast<Ports::PortT>(&GIMSK);
-        constexpr Ports::PortT _pcmsk = reinterpret_cast<Ports::PortT>(&PCMSK);
+        constexpr Ports::PortT _gimsk = Ports::convert(&GIMSK);
+        constexpr Ports::PortT _pcmsk = Ports::convert(&PCMSK);
     }
     
     constexpr Port gimsk(_gimsk);
@@ -22,7 +22,7 @@ namespace Register
 
 class Interrupts
 {
-        byte flags;
+        const byte flags;
         
     public:
         Interrupts(): flags(SREG)
@@ -31,6 +31,28 @@ class Interrupts
         };
 
         ~Interrupts()
+        {
+            SREG = flags;
+        }
+};
+
+
+class InterruptsBlock
+{
+        byte flags;
+        
+    public:
+        constexpr InterruptsBlock(): flags(0)
+        {
+        }
+        
+        void block()
+        {
+            flags = SREG;
+            cli();
+        };
+
+        void free()
         {
             SREG = flags;
         }
