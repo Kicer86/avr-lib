@@ -11,21 +11,27 @@
 #include <ports/ports.hpp>
 #include <delay.hpp>
 #include <utils/macros.hpp>
+#include <interrupts/interrupts.hpp>
 
 namespace OneWire
 {
-    template<Ports::PortT port, byte pin>
-    class InterruptBased
+    template<Ports::PortT port, byte pin, bool blockInterrupts = true>
+    class Basic
     {        
         public:
-            InterruptBased():m_state(Reset)
+            Basic():m_state(Reset)
             {
                 releaseBus();
             }
             
             void reset()
-            {                
+            {
                 IOPort bus(port);
+                
+                InterruptsBlock intBlock;
+                
+                if (blockInterrupts)
+                    intBlock.block();
                 
                 //set output to zero
                 bus[pin] = false;          //init pin output as 0
@@ -45,7 +51,10 @@ namespace OneWire
                     m_state = Ready; 
                 
                 //wait up to 480µs
-                Delay::us<480-60>();             
+                Delay::us<480-60>();
+                
+                if (blockInterrupts)
+                    intBlock.free();
             }
             
             void write(byte value) const
@@ -90,16 +99,32 @@ namespace OneWire
             template<int us>
             void powerSlaves() const 
             {
+                InterruptsBlock intBlock;
+                
+                if (blockInterrupts)
+                    intBlock.block();
+                
                 strongPullUp();                
                 Delay::us<us>();
-                releaseStrongPullUp();                
+                releaseStrongPullUp(); 
+                
+                if (blockInterrupts)
+                    intBlock.free();
             }
             
             void powerSlaves(word ms) const inline_attribute
             {
+                InterruptsBlock intBlock;
+                
+                if (blockInterrupts)
+                    intBlock.block();
+                
                 strongPullUp();                
                 Delay::ms(ms);
                 releaseStrongPullUp();                
+                
+                if (blockInterrupts)
+                    intBlock.free();
             }
             
         private:        
@@ -139,6 +164,11 @@ namespace OneWire
             template<bool addRecoveryTime>
             void write(bool value) const
             {
+                InterruptsBlock intBlock;
+                
+                if (blockInterrupts)
+                    intBlock.block();
+                
                 pullBus();
                                     
                 if (value)
@@ -153,11 +183,19 @@ namespace OneWire
                 
                 if (addRecoveryTime)
                     Delay::us<1>();
+                
+                if (blockInterrupts)
+                    intBlock.free();
             }
             
             template<bool addRecoveryTime>
             bool read() const
             {
+                InterruptsBlock intBlock;
+                
+                if (blockInterrupts)
+                    intBlock.block();
+                
                 pullBus();                
                 Delay::us<5>();         // 1 < x < 15
                 releaseBus();
@@ -169,6 +207,9 @@ namespace OneWire
                 
                 if (addRecoveryTime)
                     Delay::us<1>();
+                                
+                if (blockInterrupts)
+                    intBlock.free();
                 
                 return state;
             }
@@ -178,7 +219,7 @@ namespace OneWire
                 IOPort bus(port);
                 return bus[pin];
             }
-        
+                    
     };
 }
 #endif
