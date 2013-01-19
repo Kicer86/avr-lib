@@ -11,10 +11,11 @@ void PCInt::setup(const Ports::PortT& port, byte pin, bool set)
     switch(CpuType::cpuType)
     {
         case CpuType::AtTiny2313:
-        {           
+        case CpuType::AtTiny4313:
+        {
             if (port == Ports::PortB)
                 Register::pcmsk[pin] = set;
-                
+
             break;
         }
 

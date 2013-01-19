@@ -13,14 +13,14 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
   endif (EXISTS program_eeprom)
 
   add_custom_target(${MODULE_NAME}_backup
-    sudo avrdude ${AVRDUDE_FLAGS} -D -U flash:r:${MODULE_NAME}.hex.bak:i -U eeprom:r:${MODULE_NAME}.eep.bak:i 
+    sudo avrdude ${AVRDUDE_FLAGS} -D -U flash:r:${MODULE_NAME}.hex.bak:i -U eeprom:r:${MODULE_NAME}.eep.bak:i
     )
 
   add_custom_target(${MODULE_NAME}_install
-    sudo avrdude ${INSTALL_FLAGS} -U flash:w:${MODULE_NAME}.hex 
+    sudo avrdude ${INSTALL_FLAGS} -U flash:w:${MODULE_NAME}.hex
     )
-    
-    
+
+
   #FUSE BITY
   unset(L_FUSE)
   unset(H_FUSE)
@@ -28,9 +28,9 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
 
   if (MODULE_CPU STREQUAL "atmega8")
     set(H_FUSE 0xD9)
-    
+
     if (MODULE_CLKSRC STREQUAL "internal")
-    
+
       if (MODULE_FCPU STREQUAL "1000000")
         set(L_FUSE 0xE1)
       elseif (MODULE_FCPU STREQUAL "2000000")
@@ -42,24 +42,24 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
       else (MODULE_FCPU)
         message(FATAL_ERROR "Invalid CPU frequency")
       endif (MODULE_FCPU STREQUAL "1000000")
-      
+
     elseif (MODULE_CLKSRC STREQUAL "oscilator")
-      
+
       if (NOT MODULE_FCPU  LESS 8000000)
-        set(L_FUSE 0xEF) 
+        set(L_FUSE 0xEF)
       else (MODULE_FCPU)
         message(FATAL_ERROR "Invalid CPU frequency")
       endif (NOT MODULE_FCPU LESS 8000000)
-      
+
     endif (MODULE_CLKSRC STREQUAL "internal")
-    
-  elseif(MODULE_CPU STREQUAL "attiny2313")
-  
+
+  elseif(MODULE_CPU STREQUAL "attiny2313" OR MODULE_CPU STREQUAL "attiny4313")
+
     set(E_FUSE 0xFF)
     set(H_FUSE 0xDF)
-    
+
     if (MODULE_CLKSRC STREQUAL "internal")
-    
+
       if (MODULE_FCPU STREQUAL "500000")
         set(L_FUSE 0x62)
       elseif (MODULE_FCPU STREQUAL "1000000")
@@ -71,15 +71,15 @@ function(targets MODULE_NAME MODULE_CPU MODULE_FCPU)
       else (MODULE_FCPU)
         message(FATAL_ERROR "Invalid CPU frequency")
       endif (MODULE_FCPU STREQUAL "500000")
-      
+
     elseif (MODULE_CLKSRC STREQUAL "oscilator")
 
         message(FATAL_ERROR "unsupported yet")
-        
+
     endif (MODULE_CLKSRC STREQUAL "internal")
-    
+
   else(MODULE_CPU)
-    message(WARNING "${MODULE_CPU} (module ${MODULE_NAME}) is not supported by cpus/CMakeLists.txt. ${MODULE_NAME}_setfuses will not be generated." )  
+    message(WARNING "${MODULE_CPU} (module ${MODULE_NAME}) is not supported by cpus/CMakeLists.txt. ${MODULE_NAME}_setfuses will not be generated." )
   endif (MODULE_CPU STREQUAL "atmega8")
 
 

@@ -4,15 +4,18 @@
 
 namespace CpuType
 {
-    
+
 constexpr enum CpuType
 {
     AtTiny2313,
+    AtTiny4313,
     AtMega8
-} cpuType = 
+} cpuType =
 
 #if defined __AVR_ATtiny2313__
     AtTiny2313
+#elif defined __AVR_ATtiny4313__
+    AtTiny4313
 #elif defined __AVR_ATmega8__
     AtMega8
 #endif

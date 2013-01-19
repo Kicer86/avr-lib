@@ -14,6 +14,12 @@
 #define EEPROM_SIZE 128
 #define SRAM_SIZE   128
 
+#elif __AVR_ATtiny4313__
+
+#define FLASH_SIZE  4096
+#define EEPROM_SIZE 256
+#define SRAM_SIZE   256
+
 #else
 
 #error Unknown avr
