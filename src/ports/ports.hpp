@@ -8,7 +8,7 @@
 //Ports, to be well optimized, require -fwhole-program (if one file is being compiled)
 //or -flto (for compilation) + -fwhole-program -flto (for linking).
 
-//If you don'w want to use those options, declare all Ports as local (stack) variables or 
+//If you don'w want to use those options, declare all Ports as local (stack) variables or
 //as global objects (but with static keyword).
 
 namespace
@@ -26,12 +26,12 @@ class IOPort;
 class Pin
 {
         friend class Port;
-        
+
         const Port &m_port;
         const byte m_pos;
-        
+
         constexpr Pin(const Port &port, byte pos): m_port(port), m_pos(pos) {}
-        
+
     public:
         inline operator bool() const inline_attribute;                    //read value
         inline const Pin& operator=(bool value) const inline_attribute;   //write value
@@ -41,13 +41,13 @@ class Pin
 class IOPin
 {
         friend class IOPort;
-        
+
         const Port &m_port;
         const Port &m_pin;
         const byte m_pos;
-        
+
         constexpr IOPin(const Port &port, const Port &pin, byte pos): m_port(port), m_pin(pin), m_pos(pos) {}
-        
+
     public:
         inline operator bool() const inline_attribute;                      //read value
         inline const IOPin& operator=(bool value) const inline_attribute;   //write value
@@ -58,7 +58,7 @@ class Port
 {
     friend class IOPort;
 
-    protected:       
+    protected:
         const Ports::PortAddr addr;
 
         inline byte read() const inline_attribute
@@ -74,7 +74,7 @@ class Port
     public:
         constexpr Port(Ports::PortT a): addr(convert(a))
         {}
-        
+
         explicit Port(const Port&) = delete;
 
         inline const Port &operator=(byte v) const inline_attribute
@@ -82,7 +82,7 @@ class Port
             write(v);
             return *this;
         }
-        
+
         constexpr inline const Pin operator[](byte pos) const inline_attribute
         {
             return Pin(*this, pos);
@@ -109,7 +109,7 @@ class Port
         {
             return addr;
         }
-        
+
         Port& operator= ( const Port& ) const = delete;
 };
 
@@ -126,7 +126,7 @@ const Pin& Pin::operator=(bool value) const
         m_port |= 1 << m_pos;
     else
         m_port &= ~(1 << m_pos);
-    
+
     return *this;
 }
 
@@ -138,8 +138,8 @@ class IOPort
         const Port dir;
         const Port pin;
 
-        constexpr IOPort(Ports::PortT a): 
-            port(a), 
+        constexpr IOPort(Ports::PortT a):
+            port(a),
             dir(a - 1),
             pin(a - 2)
         {}
@@ -153,7 +153,7 @@ class IOPort
         {
             port.write(v);
             return *this;
-        }        
+        }
 
         constexpr inline const IOPin operator[](byte pos) const inline_attribute //write to IOPin writes to port, read reads from pin
         {
@@ -174,7 +174,7 @@ class IOPort
         {
             return port.address();
         }
-        
+
         IOPort& operator= ( const IOPort& ) const = delete;
 };
 
@@ -191,7 +191,7 @@ const IOPin& IOPin::operator=(bool value) const
         m_port |= 1 << m_pos;
     else
         m_port &= ~(1 << m_pos);
-    
+
     return *this;
 }
 
