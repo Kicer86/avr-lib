@@ -72,20 +72,25 @@ class HD44780
             ctrlPort.dir |= (1 << rsPos) /*| (1<<rwPos)*/ | (1 << ePos);
 //       ctrlPort&=~(1<<rwPos);    //force write only
 
-            init();
+            initialize();
         }
-        
+
+        void init()
+        {
+            initialize();
+        }
+
         void clear()
         {
             writeCommand(HD44780_CLEAR);
         }
-        
+
         void turnOff()
         {
             m_data.m_screenOn = 0;
             setDisplayMode();
-        }        
-        
+        }
+
         void turnOn()
         {
             m_data.m_screenOn = 1;
@@ -105,29 +110,29 @@ class HD44780
             while ( (data = *str++) != 0)
                 writeChar(data);
         }
-        
+
         void setCursorVisible(bool visible = true)
         {
             m_data.m_cursorOn = visible? 1 : 0;
             setDisplayMode();
         }
-        
+
         void setCursorBlink(bool blink = true)
         {
             m_data.m_blinkOn = blink? 1 : 0;
             setDisplayMode();
         }
-        
+
         void moveCursorLeft()
         {
             writeCommand(HD44780_DISPLAY_CURSOR_SHIFT | HD44780_SHIFT_CURSOR | HD44780_SHIFT_LEFT);
         }
-        
+
         void moveCursorRight()
         {
             writeCommand(HD44780_DISPLAY_CURSOR_SHIFT | HD44780_SHIFT_CURSOR | HD44780_SHIFT_RIGHT);
         }
-        
+
         void setCursorPos(int x, int y)
         {
             setAddressDD( (y % 2) * 64 + x );
@@ -151,12 +156,12 @@ class HD44780
             byte m_cursorOn:1;
             byte m_blinkOn:1;
         } m_data;
-        
+
         void setAddressDD(byte addr)
         {
             writeCommand( addr | HD44780_DDRAM_SET);
         }
-        
+
         void writeNibble(byte nibble) const
         {
             IOPort dataPort(data_port);
@@ -194,23 +199,23 @@ class HD44780
 
             Delay::ms(2);
         }
-        
+
         void setDisplayMode()
         {
             byte options = 0;
             options |= m_data.m_blinkOn?  HD44780_CURSOR_BLINK : HD44780_CURSOR_NOBLINK;
             options |= m_data.m_cursorOn? HD44780_CURSOR_ON    : HD44780_CURSOR_OFF;
             options |= m_data.m_screenOn? HD44780_DISPLAY_ON   : HD44780_DISPLAY_OFF;
-            
+
             writeCommand(HD44780_DISPLAY_ONOFF | options);
         }
 
-        void init()
+        void initialize()
         {
             m_data.m_blinkOn = 0;
             m_data.m_cursorOn = 0;
             m_data.m_screenOn = 1;
-            
+
             IOPort dataPort(data_port);
 
             Delay::ms(100);   //najgorszy przypadek - zasilanie 2,7V
@@ -228,7 +233,7 @@ class HD44780
             writeCommand(HD44780_DISPLAY_ONOFF | HD44780_DISPLAY_OFF);
             clear();
             writeCommand(HD44780_ENTRY_MODE | HD44780_EM_SHIFT_CURSOR | HD44780_EM_INCREMENT);
-            setDisplayMode();                     
+            setDisplayMode();
         }
 };
 
