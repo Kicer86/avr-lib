@@ -11,18 +11,6 @@
 
 class Usart: public UsartBase<Usart>
 {
-  protected:
-    void sendByte(byte dta) const
-    {
-      while ( (UCSRA & (1<<UDRE))==0); //wait for TX buffer empty
-      UDR=dta;
-    }
-
-    void clearFlushFlag()
-    {
-      UCSRA|=(1<<TXC);                 //clear TXC flag
-    }
-
   public:
     void configure(bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds) const
     {
@@ -93,6 +81,18 @@ class Usart: public UsartBase<Usart>
         *err=d;
 
       return d!=0;
+    }
+
+  private:
+    void sendByte(byte dta) const
+    {
+      while ( (UCSRA & (1<<UDRE))==0); //wait for TX buffer empty
+      UDR=dta;
+    }
+
+    void clearFlushFlag()
+    {
+      UCSRA|=(1<<TXC);                 //clear TXC flag
     }
 };
 

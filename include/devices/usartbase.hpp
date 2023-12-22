@@ -11,17 +11,6 @@
 template<typename Impl>
 class UsartBase
 {
-  protected:
-    void sendByte(byte dta) const
-    {
-      static_cast<Impl*>(this)->sendByte(dta);
-    }
-
-    void clearFlushFlag()
-    {
-      static_cast<Impl*>(this)->clearFlushFlag();
-    }
-
   public:
     enum DataSize
     {
@@ -107,6 +96,17 @@ class UsartBase
     {
       for (byte i=0; i<size; ++i)
         sendByte(PMem::readByte(buff+i));
+    }
+
+  private:
+    void sendByte(byte dta) const
+    {
+      static_cast<Impl*>(this)->sendByte(dta);
+    }
+
+    void clearFlushFlag()
+    {
+      static_cast<Impl*>(this)->clearFlushFlag();
     }
 };
 
