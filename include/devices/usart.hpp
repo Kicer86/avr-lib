@@ -5,8 +5,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "datatypes.h"
-#include "devices/baudrate.hpp"
+#include "../datatypes.h"
+#include "baudrate.hpp"
 #include "usartbase.hpp"
 
 class Usart: public UsartBase
@@ -40,8 +40,8 @@ class Usart: public UsartBase
 
       UCSRB=b;
 
-      UCSRC=(1<<URSEL) | //w atmega8 trzeba ustawić ten bit gdy się pisze do UCSRC
-            p          | //parzystość
+      //TODO: reenable UCSRC=(1<<URSEL) | //w atmega8 trzeba ustawić ten bit gdy się pisze do UCSRC
+      UCSRC=p          | //parzystość
             sb         | //bity stopu
             ds;          //bity danych
     }
@@ -83,7 +83,7 @@ class Usart: public UsartBase
     {
       while ( (UCSRA & (1<<TXC))==0);  //wait for TX to be ready
     }
-    
+
     bool error(byte* err = 0) const
     {
       byte d=UCSRA;
@@ -91,7 +91,7 @@ class Usart: public UsartBase
       d&=7;
       if (err)
         *err=d;
-      
+
       return d!=0;
     }
 };

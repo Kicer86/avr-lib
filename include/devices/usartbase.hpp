@@ -4,9 +4,9 @@
 #define USARTBASE_HPP
 
 
-#include "datatypes.h"
+#include "../datatypes.h"
+#include "../progmem.hpp"
 #include "baudrate.hpp"
-#include "progmem.hpp"
 
 class UsartBase
 {
@@ -41,7 +41,7 @@ class UsartBase
     virtual bool hasData() const=0;
     virtual byte read() const=0;
     virtual void flush() const=0;             //make sure transmition is over
-    virtual bool error(byte *err=0) const=0;  //check if error occured. err will be filled with status (frame error (4), data overrun(2) or parity error (1) ) 
+    virtual bool error(byte *err=0) const=0;  //check if error occured. err will be filled with status (frame error (4), data overrun(2) or parity error (1) )
 
     void write(byte data)
     {
