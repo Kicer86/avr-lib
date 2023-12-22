@@ -1,5 +1,5 @@
 
-#ifndef UASRT_HPP
+#ifndef USART_HPP
 #define USART_HPP
 
 #include <avr/io.h>
@@ -100,4 +100,4 @@ class Usart: public UsartBase
 // that flush command will not be fooled by one ofthre previous transmissions (TXC flag
 // is cleared automnatically only in TX interrupt).
 
-#endif //USART_HPP
+#endif
