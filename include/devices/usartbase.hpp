@@ -8,11 +8,19 @@
 #include "../progmem.hpp"
 #include "baudrate.hpp"
 
+template<typename Impl>
 class UsartBase
 {
   protected:
-    virtual void sendByte(byte dta) const=0;
-    virtual void clearFlushFlag()=0;
+    void sendByte(byte dta) const
+    {
+      static_cast<Impl*>(this)->sendByte(dta);
+    }
+
+    void clearFlushFlag()
+    {
+      static_cast<Impl*>(this)->clearFlushFlag();
+    }
 
   public:
     enum DataSize
@@ -36,12 +44,34 @@ class UsartBase
       Odd=0x30
     };
 
-    virtual void configure(bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds) const=0 ;
-    virtual void changeBaudRate(Baudrate::Baudrates) const=0;
-    virtual bool hasData() const=0;
-    virtual byte read() const=0;
-    virtual void flush() const=0;             //make sure transmition is over
-    virtual bool error(byte *err=0) const=0;  //check if error occured. err will be filled with status (frame error (4), data overrun(2) or parity error (1) )
+    void configure(bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds) const
+    {
+      static_cast<Impl*>(this)->configure(tx, rx, br, p, sb, ds);
+    }
+
+    void changeBaudRate(Baudrate::Baudrates br) const
+    {
+      static_cast<Impl*>(this)->changeBaudRate(br);
+    }
+
+    bool hasData() const
+    {
+      return static_cast<Impl*>(this)->hasData();
+    }
+
+    byte read() const
+    {
+      return static_cast<Impl*>(this)->read();
+    }
+
+    void flush() const                //make sure transmition is over
+    {
+      static_cast<Impl*>(this)->flush();
+    }
+    bool error(byte *err=0) const     //check if error occured. err will be filled with status (frame error (4), data overrun(2) or parity error (1) )
+    {
+      return static_cast<Impl*>(this)->error(err);
+    }
 
     void write(byte data)
     {

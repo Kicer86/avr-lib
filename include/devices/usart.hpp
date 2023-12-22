@@ -9,7 +9,7 @@
 #include "baudrate.hpp"
 #include "usartbase.hpp"
 
-class Usart: public UsartBase
+class Usart: public UsartBase<Usart>
 {
   protected:
     void sendByte(byte dta) const
