@@ -3,6 +3,7 @@
 #define USART_HPP
 
 #include <utility>
+#include <cmath>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -19,11 +20,11 @@ namespace
   {
     constexpr int mul = doubleSpeed? 8 : 16;
     constexpr double exact_ubrr = static_cast<double>(F_CPU) / (mul * baud) - 1;
-    constexpr long rounded_ubrr = round<long>(exact_ubrr);
+    constexpr long rounded_ubrr = std::lround(exact_ubrr);
     static_assert(rounded_ubrr < 65536);
 
     constexpr long real_baud = F_CPU / (mul * (rounded_ubrr + 1));
-    constexpr long diff = abs(real_baud - baud);
+    constexpr long diff = labs(real_baud - baud);
     constexpr auto error = diff/static_cast<double>(baud) * 100;
 
     return {rounded_ubrr, error};
