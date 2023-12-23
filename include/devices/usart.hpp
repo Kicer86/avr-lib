@@ -6,6 +6,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#include "../cputype.hpp"
 #include "../datatypes.h"
 #include "../checks/require_fcpu.h"
 #include "usartbase.hpp"
@@ -70,10 +71,14 @@ class Usart: public UsartBase<Usart>
 
       UCSRB=b;
 
-      //TODO: reenable UCSRC=(1<<URSEL) | //w atmega8 trzeba ustawić ten bit gdy się pisze do UCSRC
-      UCSRC = p          | //parzystość
-              sb         | //bity stopu
-              ds;          //bity danych
+      byte c = sb | ds;
+
+#ifdef URSEL
+      if constexpr (CpuType::cpuType == CpuType::AtMega8)
+        c |= 1 << URSEL;            //writing to UCSRC on AtMega8 requires this (see reference manual for details)
+#endif
+
+      UCSRC = c;
     }
 
     template<dword baud>
