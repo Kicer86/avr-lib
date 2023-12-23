@@ -2,12 +2,52 @@
 #ifndef USART_HPP
 #define USART_HPP
 
+#include <utility>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
 #include "../datatypes.h"
 #include "../checks/require_fcpu.h"
 #include "usartbase.hpp"
+
+
+namespace
+{
+  template<bool doubleSpeed, dword baud>
+  constexpr std::pair<word, double> calculateUBRRwithError()
+  {
+    constexpr int mul = doubleSpeed? 8 : 16;
+    constexpr double exact_ubrr = static_cast<double>(F_CPU) / (mul * baud) - 1;
+    constexpr long rounded_ubrr = round<long>(exact_ubrr);
+    static_assert(rounded_ubrr < 65536);
+
+    constexpr long real_baud = F_CPU / (mul * (rounded_ubrr + 1));
+    constexpr long diff = abs(real_baud - baud);
+    constexpr auto error = diff/static_cast<double>(baud) * 100;
+
+    return {rounded_ubrr, error};
+  }
+
+  template<dword baud>
+  constexpr std::pair<word, bool> calculateUBRR()
+  {
+    constexpr double maxError = 4.5;
+
+    // try to calculate UBRR value for single speed
+    constexpr auto ubrr16 = calculateUBRRwithError<false, baud>();
+    if constexpr (ubrr16.second < maxError)
+      return {ubrr16.first, false};
+    else
+    {
+      // try to calculate UBRR value for double speed
+
+      constexpr auto ubrr8 = calculateUBRRwithError<true, baud>();
+      static_assert(ubrr8.second < maxError, "Too big frequency error for USART. Adjust F_CPU and/or baud rate");
+
+      return {ubrr8.first, true};
+    }
+  }
+}
 
 
 class Usart: public UsartBase<Usart>
@@ -39,21 +79,17 @@ class Usart: public UsartBase<Usart>
     template<dword baud>
     void changeBaudRate() const
     {
-      constexpr int mul = 16;
-      constexpr double exact_ubrr = static_cast<double>(F_CPU) / (mul * baud) - 1;
-      constexpr long rounded_ubrr = round<long>(exact_ubrr);
-      static_assert(rounded_ubrr < 65536);
-
-      constexpr long  real_baud = F_CPU / (mul * (rounded_ubrr + 1));
-      constexpr long diff = abs(real_baud - baud);
-      constexpr auto error = diff/static_cast<double>(baud) * 100;
-
-      // based on https://stackoverflow.com/questions/65092264/how-to-set-atmega64a-au-usart-speed-to-115200
-      static_assert(error <= 4.5, "Too big frequency error for USART. Adjust F_CPU and/or baud rate");
+      constexpr auto ubrr = calculateUBRR<baud>();
 
       // setup usart module
-      UBRRH = (baud >> 8) & 0xff;
-      UBRRL = baud & 0xff;
+      UBRRH = (ubrr.first >> 8) & 0xff;
+      UBRRL = ubrr.first & 0xff;
+
+      // setup double speed
+      if constexpr (ubrr.second)
+        UCSRA |= U2X;
+      else
+        UCSRA &= ~U2X;
     }
 
     void enableRXInt(bool enable = true) const
