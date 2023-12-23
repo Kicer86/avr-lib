@@ -55,7 +55,7 @@ class UsartBase
       return static_cast<Impl*>(this)->read();
     }
 
-    void flush() const                //make sure transmition is over
+    void flush() const                        //make sure transmition is over
     {
       static_cast<Impl*>(this)->flush();
     }

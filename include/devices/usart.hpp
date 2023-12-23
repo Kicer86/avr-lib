@@ -41,7 +41,6 @@ namespace
     else
     {
       // try to calculate UBRR value for double speed
-
       constexpr auto ubrr8 = calculateUBRRwithError<true, baud>();
       static_assert(ubrr8.second < maxError, "Too big frequency error for USART. Adjust F_CPU and/or baud rate");
 
@@ -71,10 +70,10 @@ class Usart: public UsartBase<Usart>
 
       UCSRB=b;
 
-      byte c = sb | ds;
+      byte c = static_cast<byte>(sb) | static_cast<byte>(ds);
 
 #ifdef URSEL
-      if constexpr (CpuType::cpuType == CpuType::AtMega8)
+      if constexpr (Cpu::type() == Cpu::Type::AtMega8)
         c |= 1 << URSEL;            //writing to UCSRC on AtMega8 requires this (see reference manual for details)
 #endif
 
