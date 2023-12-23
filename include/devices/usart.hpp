@@ -14,11 +14,12 @@
 class Usart: public UsartBase<Usart>
 {
   public:
-    void configure(bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds) const
+    template<bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds>
+    void configure() const
     {
       byte b = 0;
 
-      changeBaudRate(br);
+      changeBaudRate<br>();
 
       if (tx)
         b |= /*(1<<UDRIE) |*/ // włącz przerwanie od pustego bufora
@@ -36,7 +37,8 @@ class Usart: public UsartBase<Usart>
               ds;          //bity danych
     }
 
-    void changeBaudRate(Baudrate::Baudrates br) const
+    template<Baudrate::Baudrates br>
+    void changeBaudRate() const
     {
       word ubrr = F_CPU/(16L * br)-1;
       UBRRH = ubrr >> 8;

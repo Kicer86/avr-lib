@@ -33,14 +33,16 @@ class UsartBase
       Odd  = 0x30
     };
 
-    void configure(bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds) const
+    template<bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds>
+    void configure() const
     {
-      static_cast<Impl*>(this)->configure(tx, rx, br, p, sb, ds);
+      static_cast<Impl*>(this)->template configure<tx, rx, br, p, sb, ds>();
     }
 
-    void changeBaudRate(Baudrate::Baudrates br) const
+    template<Baudrate::Baudrates br>
+    void changeBaudRate() const
     {
-      static_cast<Impl*>(this)->changeBaudRate(br);
+      static_cast<Impl*>(this)->template changeBaudRate<br>();
     }
 
     bool hasData() const
