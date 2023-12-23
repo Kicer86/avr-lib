@@ -54,6 +54,8 @@ namespace
 class Usart: public UsartBase<Usart>
 {
   public:
+    friend UsartBase<Usart>;
+
     template<bool tx, bool rx, dword baud, Parity p, StopBits sb, DataSize ds>
     void configure() const
     {

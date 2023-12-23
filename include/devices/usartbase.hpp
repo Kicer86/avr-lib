@@ -12,7 +12,7 @@ template<typename Impl>
 class UsartBase
 {
   public:
-    enum DataSize
+    enum class DataSize
     {
       D5 = 0,
       D6 = 2,
@@ -20,13 +20,13 @@ class UsartBase
       D8 = 6
     };
 
-    enum StopBits
+    enum class StopBits
     {
       S1 = 0,
       S2 = 1<<3
     };
 
-    enum Parity
+    enum class Parity
     {
       None = 0,
       Even = 0x20,
@@ -104,7 +104,7 @@ class UsartBase
   private:
     void sendByte(byte dta) const
     {
-      static_cast<Impl*>(this)->sendByte(dta);
+      static_cast<const Impl*>(this)->sendByte(dta);
     }
 
     void clearFlushFlag()
