@@ -6,8 +6,10 @@
 #include <avr/interrupt.h>
 
 #include "../datatypes.h"
+#include "../checks/require_fcpu.h"
 #include "baudrate.hpp"
 #include "usartbase.hpp"
+
 
 class Usart: public UsartBase<Usart>
 {
