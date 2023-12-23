@@ -56,7 +56,7 @@ class Usart: public UsartBase<Usart>
       UBRRL = baud & 0xff;
     }
 
-    void enableRXInt(bool enable=true) const
+    void enableRXInt(bool enable = true) const
     {
       if (enable)
         UCSRB |= (1<<RXCIE);
@@ -64,7 +64,7 @@ class Usart: public UsartBase<Usart>
         UCSRB &= ~(1<<RXCIE);
     }
 
-    void enableTXInt(bool enable=true) const
+    void enableTXInt(bool enable = true) const
     {
       if (enable)
         UCSRB |= (1<<UDRIE);
