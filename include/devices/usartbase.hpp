@@ -6,7 +6,7 @@
 
 #include "../datatypes.h"
 #include "../progmem.hpp"
-#include "baudrate.hpp"
+
 
 template<typename Impl>
 class UsartBase
@@ -33,13 +33,13 @@ class UsartBase
       Odd  = 0x30
     };
 
-    template<bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds>
+    template<bool tx, bool rx, dword baud, Parity p, StopBits sb, DataSize ds>
     void configure() const
     {
-      static_cast<Impl*>(this)->template configure<tx, rx, br, p, sb, ds>();
+      static_cast<Impl*>(this)->template configure<tx, rx, baud, p, sb, ds>();
     }
 
-    template<Baudrate::Baudrates br>
+    template<dword br>
     void changeBaudRate() const
     {
       static_cast<Impl*>(this)->template changeBaudRate<br>();

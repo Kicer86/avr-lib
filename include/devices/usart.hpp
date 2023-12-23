@@ -7,19 +7,18 @@
 
 #include "../datatypes.h"
 #include "../checks/require_fcpu.h"
-#include "baudrate.hpp"
 #include "usartbase.hpp"
 
 
 class Usart: public UsartBase<Usart>
 {
   public:
-    template<bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds>
+    template<bool tx, bool rx, dword baud, Parity p, StopBits sb, DataSize ds>
     void configure() const
     {
       byte b = 0;
 
-      changeBaudRate<br>();
+      changeBaudRate<baud>();
 
       if (tx)
         b |= /*(1<<UDRIE) |*/ // włącz przerwanie od pustego bufora
@@ -37,12 +36,24 @@ class Usart: public UsartBase<Usart>
               ds;          //bity danych
     }
 
-    template<Baudrate::Baudrates br>
+    template<dword baud>
     void changeBaudRate() const
     {
-      word ubrr = F_CPU/(16L * br)-1;
-      UBRRH = ubrr >> 8;
-      UBRRL = ubrr;
+      constexpr int mul = 16;
+      constexpr double exact_ubrr = static_cast<double>(F_CPU) / (mul * baud) - 1;
+      constexpr long rounded_ubrr = round<long>(exact_ubrr);
+      static_assert(rounded_ubrr < 65536);
+
+      constexpr long  real_baud = F_CPU / (mul * (rounded_ubrr + 1));
+      constexpr long diff = abs(real_baud - baud);
+      constexpr auto error = diff/static_cast<double>(baud) * 100;
+
+      // based on https://stackoverflow.com/questions/65092264/how-to-set-atmega64a-au-usart-speed-to-115200
+      static_assert(error <= 4.5, "Too big frequency error for USART. Adjust F_CPU and/or baud rate");
+
+      // setup usart module
+      UBRRH = (baud >> 8) & 0xff;
+      UBRRL = baud & 0xff;
     }
 
     void enableRXInt(bool enable=true) const
