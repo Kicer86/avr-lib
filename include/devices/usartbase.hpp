@@ -14,23 +14,23 @@ class UsartBase
   public:
     enum DataSize
     {
-      D5=0,
-      D6=2,
-      D7=4,
-      D8=6
+      D5 = 0,
+      D6 = 2,
+      D7 = 4,
+      D8 = 6
     };
 
     enum StopBits
     {
-      S1=0,
-      S2=1<<3
+      S1 = 0,
+      S2 = 1<<3
     };
 
     enum Parity
     {
-      None=0,
-      Even=0x20,
-      Odd=0x30
+      None = 0,
+      Even = 0x20,
+      Odd  = 0x30
     };
 
     void configure(bool tx, bool rx, Baudrate::Baudrates br, Parity p, StopBits sb, DataSize ds) const
@@ -57,7 +57,8 @@ class UsartBase
     {
       static_cast<Impl*>(this)->flush();
     }
-    bool error(byte *err=0) const     //check if error occured. err will be filled with status (frame error (4), data overrun(2) or parity error (1) )
+
+    bool error(byte* err = nullptr) const     //check if error occured. err will be filled with status (frame error (4), data overrun(2) or parity error (1) )
     {
       return static_cast<Impl*>(this)->error(err);
     }
@@ -70,9 +71,9 @@ class UsartBase
 
     void writeString(const char *str)
     {
-      byte c;
+      char c;
       clearFlushFlag();
-      while ( (c=*str++)!=0)
+      while ((c = *str++) != 0)
         sendByte(c);
     }
 
@@ -81,7 +82,7 @@ class UsartBase
     {
       byte c;
       clearFlushFlag();
-      while ( (c=PMem::readByte(str++))!=0)
+      while ((c = PMem::readByte(str++)) != 0)
         sendByte(c);
     }
 
