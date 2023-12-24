@@ -5,7 +5,6 @@
 #include <utility>
 #include <cmath>
 #include <avr/io.h>
-#include <avr/interrupt.h>
 
 #include "../cputype.hpp"
 #include "../datatypes.h"
@@ -145,7 +144,7 @@ class Usart: public UsartBase<Usart>
     void sendByte(byte dta) const
     {
       while ((UCSRA & (1<<UDRE)) == 0); //wait for TX buffer empty
-      UDR=dta;
+      UDR = dta;
     }
 
     void clearFlushFlag()
