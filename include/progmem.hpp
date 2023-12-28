@@ -9,7 +9,7 @@
 #include "common.hpp"
 
 //typedef would be better but unfortunatelly attribute __progmem__ doesn't work for c++
-// and section attribute cannot be used with typedef 
+// and section attribute cannot be used with typedef
 
 #define p_byte const byte FLASH(const_progmem_data)
 #define p_char const char FLASH(const_progmem_data)
@@ -33,6 +33,26 @@ namespace PMem
     return pgm_read_byte_far(addr);
   }
 #endif
+
+  template<typename T>
+  class Ptr
+  {
+    public:
+      Ptr(T* addr): m_addr(addr) {}
+      T operator[](int idx) const
+      {
+        return static_cast<T>(readByte(m_addr + idx));
+      }
+
+    private:
+      T* m_addr;
+  };
 }
+
+#define P_STR(str)                        \
+  [](){                                   \
+    static const char s[] PROGMEM = str;  \
+    return PMem::Ptr<const char>(s);      \
+  }()
 
 #endif //PROGMEM_HPP
