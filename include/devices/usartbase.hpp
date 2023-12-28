@@ -71,7 +71,7 @@ class UsartBase
       sendByte(data);
     }
 
-    void writeString(const char *str)
+    void write(const char *str)
     {
       char c;
       clearFlushFlag();
@@ -86,17 +86,17 @@ class UsartBase
         sendByte(pdata[i]);
     }
 
-    void writeData(const byte *buff, byte size)
+    void write(const byte *buff, byte size)
     {
       for (byte i=0; i<size; ++i)
         sendByte(buff[i]);
     }
 
     template<typename T>
-    void write_PData(T *buff, byte size)
+    void write_PData(const PMem::Ptr<T>& buff, byte size)
     {
-      for (byte i=0; i<size; ++i)
-        sendByte(PMem::readByte(buff+i));
+      for (byte i = 0; i < size; i++)
+        sendByte(buff[i]);
     }
 
   private:
