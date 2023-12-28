@@ -71,12 +71,11 @@ class UsartBase
       sendByte(data);
     }
 
-    void write(const char *str)
+    void write(const char* str)
     {
-      char c;
       clearFlushFlag();
-      while ((c = *str++) != 0)
-        sendByte(c);
+      for(std::size_t i = 0; str[i] != '\0'; i++)
+        sendByte(str[i]);
     }
 
     void write(const PMem::Ptr<const char>& pdata)
