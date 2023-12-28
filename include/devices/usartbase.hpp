@@ -52,7 +52,7 @@ class UsartBase
 
     byte read() const
     {
-      return static_cast<Impl*>(this)->read();
+      return readByte();
     }
 
     void flush() const                        //make sure transmition is over
@@ -79,13 +79,11 @@ class UsartBase
         sendByte(c);
     }
 
-    template<typename T>
-    void write_PString(T *str)
+    void write(const PMem::Ptr<const char>& pdata)
     {
-      byte c;
       clearFlushFlag();
-      while ((c = PMem::readByte(str++)) != 0)
-        sendByte(c);
+      for(std::size_t i = 0; pdata[i] != '\0'; i++)
+        sendByte(pdata[i]);
     }
 
     void writeData(const byte *buff, byte size)
@@ -110,6 +108,11 @@ class UsartBase
     void clearFlushFlag()
     {
       static_cast<Impl*>(this)->clearFlushFlag();
+    }
+
+    byte readByte() const
+    {
+      return static_cast<Impl*>(this)->readByte();
     }
 };
 

@@ -119,11 +119,6 @@ class Usart: public UsartBase<Usart>
       return UCSRA & (1<<RXC);
     }
 
-    byte read() const
-    {
-      return UDR;
-    }
-
     void flush() const
     {
       while ((UCSRA & (1<<TXC)) == 0);  //wait for TX to be ready
@@ -150,6 +145,11 @@ class Usart: public UsartBase<Usart>
     void clearFlushFlag()
     {
       UCSRA |= (1<<TXC);                 //clear TXC flag
+    }
+
+    byte readByte() const
+    {
+      return UDR;
     }
 };
 
